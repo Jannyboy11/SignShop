@@ -35,7 +35,7 @@ public class LWCHook implements Hook {
         if(lwc == null)
             return false;
         if(lwc.findProtection(block) == null) {
-            Protection prot = lwc.getPhysicalDatabase().registerProtection(block.getTypeId(), Protection.Type.PRIVATE,
+            Protection prot = lwc.getPhysicalDatabase().registerProtection(block.getType().getId(), Protection.Type.PRIVATE,
                     block.getWorld().getName(), player.getUniqueId().toString(), "", block.getX(), block.getY(), block.getZ());
             lwc.getPhysicalDatabase().saveProtection(prot);
             return true;

@@ -135,7 +135,7 @@ public class signshopUtil {
                 Enchantment eTemp;
                 try {
                     iEnchantment = Integer.parseInt(sEnchantment[0]);
-                    eTemp = Enchantment.getById(iEnchantment);
+                    eTemp = Enchantment.getByName(sEnchantment[0]);
                 } catch(NumberFormatException ex) {
                     eTemp = Enchantment.getByName(sEnchantment[0]);
                 }

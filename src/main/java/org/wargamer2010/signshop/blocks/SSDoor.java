@@ -1,6 +1,7 @@
 package org.wargamer2010.signshop.blocks;
 
 import org.bukkit.block.Block;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.material.Door;
 
 /**
@@ -37,15 +38,4 @@ public class SSDoor extends Door {
             return bBottomHalf.getData();
     }
 
-    /**
-     * Set the data of the bottom half of the door
-     * @param data data to be set
-     */
-    @Override
-    public void setData(byte data) {
-        if(bBottomHalf == null)
-            super.setData(data);
-        else
-            bBottomHalf.setData(data);
-    }
 }

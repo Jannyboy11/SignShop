@@ -486,7 +486,7 @@ public class itemUtil {
 
                 if(isItems[i] == null) {
                     isItems[i] = tags.getCraftItemstack(
-                        Material.getMaterial(Integer.parseInt(sItemprops[1])),
+                        Material.getMaterial(sItemprops[1]),
                         Integer.parseInt(sItemprops[0]),
                         Short.parseShort(sItemprops[2])
                     );
@@ -556,7 +556,7 @@ public class itemUtil {
                 stacks[0] = isCurrent;
 
                 sItems.add((isCurrent.getAmount() + Storage.getItemSeperator()
-                        + isCurrent.getTypeId() + Storage.getItemSeperator()
+                        + isCurrent.getType().getId() + Storage.getItemSeperator()
                         + isCurrent.getDurability() + Storage.getItemSeperator()
                         + isCurrent.getData().getData() + Storage.getItemSeperator()
                         + signshopUtil.convertEnchantmentsToString(isCurrent.getEnchantments()) + Storage.getItemSeperator()

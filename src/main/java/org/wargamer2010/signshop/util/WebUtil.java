@@ -31,7 +31,7 @@ public class WebUtil {
         if(!SignShopConfig.getEnableNamesFromTheWeb())
             return "";
         String data = Byte.toString(stack.getData().getData());
-        String idToLookup = Integer.toString(stack.getTypeId());
+        String idToLookup = Integer.toString(stack.getType().getId());
         String combo = idToLookup;
         if(!data.equals("0"))
             combo += (":" + data);

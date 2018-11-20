@@ -12,7 +12,7 @@ public class spoutUtil {
     public static String getName(org.bukkit.material.MaterialData data, Short durability) {
         if(data == null)
             return null;
-        Material spoutmat = MaterialData.getMaterial(data.getItemTypeId(), durability);
+        Material spoutmat = MaterialData.getMaterial(data.getItemType().getId(), durability);
         if(spoutmat != null)
             return spoutmat.getName();
         else
