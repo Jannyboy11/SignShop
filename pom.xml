@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.wargamer2010</groupId>
-    <artifactId>signshop</artifactId>
-    <version>2.11.2</version>
+    <artifactId>SignShop</artifactId>
+    <version>2.11.3</version>
     <packaging>jar</packaging>
 
     <name>Signshop</name>
@@ -21,10 +21,9 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.7.0</version>
+                <version>3.8.0</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <release>8</release>
                 </configuration>
             </plugin>
         </plugins>
@@ -61,13 +60,17 @@
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
+        <repository>
+            <id>ess-repo</id>
+            <url>http://repo.ess3.net/content/groups/essentials</url>
+        </repository>
     </repositories>
 
     <dependencies>
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.13.2-R0.1-SNAPSHOT</version>
+            <version>1.14.1-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -79,7 +82,7 @@
         <dependency>
             <groupId>ch.njol</groupId>
             <artifactId>skript</artifactId>
-            <version>2.0.1</version><!-- Use whatever version you want to depend on -->
+            <version>2.0.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -128,40 +131,47 @@
             <systemPath>${project.basedir}/libs/LoreLocks.jar</systemPath>
             <version>1.0.0</version>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>net.sacredlabyrinth.Phaed</groupId>-->
+<!--            <artifactId>PreciousStones</artifactId>-->
+<!--            <scope>system</scope>-->
+<!--            <systemPath>${project.basedir}/libs/PreciousStones-1.12.jar</systemPath>-->
+<!--            <version>1.12</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>com.bekvon.bukkit</groupId>-->
+<!--            <artifactId>residence</artifactId>-->
+<!--            <scope>system</scope>-->
+<!--            <systemPath>${project.basedir}/libs/Residence.jar</systemPath>-->
+<!--            <version>1.0.0</version>-->
+<!--        </dependency>-->
         <dependency>
-            <groupId>net.sacredlabyrinth.Phaed</groupId>
-            <artifactId>PreciousStones</artifactId>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/libs/PreciousStones-1.12.jar</systemPath>
-            <version>1.12</version>
+            <!-- on the Ess Repo -->
+            <groupId>net.ess3</groupId>
+            <artifactId>Essentials</artifactId>
+            <version>2.13.1</version> <!-- Stable version -->
+            <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>com.bekvon.bukkit</groupId>
-            <artifactId>residence</artifactId>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/libs/Residence.jar</systemPath>
-            <version>1.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.earth2me</groupId>
-            <artifactId>essentials</artifactId>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/libs/EssentialsX-2.15.0.55.jar</systemPath>
-            <version>2.15.0.55</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.earth2me</groupId>-->
+<!--            <artifactId>essentials</artifactId>-->
+<!--            <scope>system</scope>-->
+<!--            <systemPath>${project.basedir}/libs/EssentialsX-2.15.0.55.jar</systemPath>-->
+<!--            <version>2.15.0.55</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.dynmap</groupId>
             <artifactId>dynmap</artifactId>
             <scope>system</scope>
-            <systemPath>${project.basedir}/libs/Dynmap-3.0-beta-1-spigot.jar</systemPath>
+            <systemPath>${project.basedir}/libs/Dynmap-3.0-beta-3-spigot.jar</systemPath>
             <version>3.0</version>
         </dependency>
         <dependency>
             <groupId>com.griefcraft</groupId>
             <artifactId>lwc</artifactId>
             <scope>system</scope>
-            <systemPath>${project.basedir}/libs/LWC.jar</systemPath>
-            <version>1.0.0</version>
+            <systemPath>${project.basedir}/libs/Modern-LWC-2.1.2.jar</systemPath>
+            <version>2.1.2</version>
         </dependency>
         <dependency>
             <groupId>com.palmergames.bukkit</groupId>
@@ -170,19 +180,19 @@
             <systemPath>${project.basedir}/libs/Towny.jar</systemPath>
             <version>1.0.0</version>
         </dependency>
-        <dependency>
-            <groupId>com.worldcretornica</groupId>
-            <artifactId>plotme_core</artifactId>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/libs/PlotMe-Core.jar</systemPath>
-            <version>1.0.0</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.worldcretornica</groupId>-->
+<!--            <artifactId>plotme_core</artifactId>-->
+<!--            <scope>system</scope>-->
+<!--            <systemPath>${project.basedir}/libs/PlotMe-Core.jar</systemPath>-->
+<!--            <version>1.0.0</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>com.kellerkindt</groupId>
             <artifactId>scs</artifactId>
             <scope>system</scope>
-            <systemPath>${project.basedir}/libs/ShowCaseStandalone-0.0.1-SNAPSHOT.jar</systemPath>
-            <version>0.0.1</version>
+            <systemPath>${project.basedir}/libs/ShowCaseStandalone.jar</systemPath>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.yi.acru.bukkit</groupId>

@@ -1,16 +1,8 @@
 package org.wargamer2010.signshop.util;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.World;
+import java.util.*;
+
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
@@ -22,7 +14,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.wargamer2010.signshop.Seller;
+import org.wargamer2010.signshop.Shop;
 import org.wargamer2010.signshop.SignShop;
 import org.wargamer2010.signshop.Vault;
 import org.wargamer2010.signshop.configuration.LinkableMaterial;
@@ -39,16 +31,16 @@ import org.wargamer2010.signshop.operations.SignShopOperationListItem;
 import org.wargamer2010.signshop.player.SignShopPlayer;
 import org.wargamer2010.signshop.specialops.SignShopSpecialOp;
 
-public class signshopUtil {
+public class SignShopUtil {
 
-    private signshopUtil() {
+    private SignShopUtil() {
     }
 
     public static String getOperation(Sign sign, boolean lowercase) {
-        if(sign == null)
+        if (sign == null)
             return "";
         String sSignOperation = sign.getLine(0);
-        if(sSignOperation.length() < 4){
+        if (sSignOperation.length() < 4) {
             return "";
         }
         String stripped = ChatColor.stripColor(sSignOperation);
@@ -57,7 +49,7 @@ public class signshopUtil {
     }
 
     public static String getOperation(String sSignOperation) {
-        if(sSignOperation.length() < 4){
+        if (sSignOperation.length() < 4){
             return "";
         }
         String stripped = ChatColor.stripColor(sSignOperation);
@@ -70,45 +62,44 @@ public class signshopUtil {
     }
 
     public static List<String> getParameters(String sOperation) {
-        List<String> parts = new LinkedList<String>();
-        if(sOperation.contains("{") && sOperation.contains("}")) {
+        List<String> parts = new LinkedList<>();
+        if (sOperation.contains("{") && sOperation.contains("}")) {
             parts.add(sOperation.substring(0, sOperation.indexOf('{')));
             String parameter = sOperation.substring(sOperation.indexOf('{')+1, (sOperation.lastIndexOf('}')));
             String[] parbits = parameter.split(",");
-            if(parbits.length > 1)
+            if (parbits.length > 1)
                 parts.addAll(Arrays.asList(parbits));
             else
                 parts.add(parameter);
         }
-        if(parts.isEmpty())
+        if (parts.isEmpty())
             parts.add(sOperation);
         return parts;
     }
 
     public static SignShopOperation getSignShopBlock(String blockName) {
-        if(blockName == null)
+        if (blockName == null)
             return null;
-        if(SignShopConfig.getOperationInstances().containsKey(blockName))
-            return SignShopConfig.getOperationInstances().get(blockName);
-        return null;
+
+        return SignShopConfig.getOperationInstances().get(blockName);
     }
 
     public static boolean getPriceFromMoneyEvent(SignShopArguments ssArgs) {
         SSMoneyTransactionEvent moneyevent = SSEventFactory.generateMoneyEvent(ssArgs, ssArgs.getMoneyEventType(), SSMoneyRequestType.GetAmount);
-        SignShop.scheduleEvent(moneyevent);
+        SignShop.callEvent(moneyevent);
         ssArgs.getPrice().set(moneyevent.getPrice());
-        ssArgs.setMessagePart("!price", economyUtil.formatMoney(ssArgs.getPrice().get()));
+        ssArgs.setMessagePart("!price", EconomyUtil.formatMoney(ssArgs.getPrice().get()));
         return ((!moneyevent.isCancelled()) && moneyevent.isHandled());
     }
 
     public static List<SignShopOperationListItem> getSignShopOps(List<String> operation) {
-        List<SignShopOperationListItem> SignShopOperations = new LinkedList<SignShopOperationListItem>();
-        for(String sSignShopOp : operation) {
+        List<SignShopOperationListItem> SignShopOperations = new LinkedList<>();
+        for (String sSignShopOp : operation) {
             List<String> bits = getParameters(sSignShopOp);
             String op = bits.get(0);
             bits.remove(0);
             SignShopOperation ssOP = getSignShopBlock(op);
-            if(ssOP == null)
+            if (ssOP == null)
                 return null;
             else
                 SignShopOperations.add(new SignShopOperationListItem(ssOP, bits));
@@ -122,14 +113,14 @@ public class signshopUtil {
 
     @SuppressWarnings("deprecation") // Accepted for transition reasons
     public static Map<Enchantment, Integer> convertStringToEnchantments(String sEnchantments) {
-        Map<Enchantment, Integer> mEnchantments = new HashMap<Enchantment, Integer>();
+        Map<Enchantment, Integer> mEnchantments = new HashMap<>();
         String saEnchantments[] = sEnchantments.split(";");
-        if(saEnchantments.length == 0)
+        if (saEnchantments.length == 0)
             return mEnchantments;
-        for(int i = 0; i < saEnchantments.length; i++) {
-            String sEnchantment[] = saEnchantments[i].split("\\|");
+        for (int i = 0; i < saEnchantments.length; i++) {
+            String[] sEnchantment = saEnchantments[i].split("\\|");
             int iEnchantment; int iEnchantmentLevel;
-            if(sEnchantment.length < 2)
+            if (sEnchantment.length < 2)
                 continue;
             else {
                 Enchantment eTemp;
@@ -139,43 +130,43 @@ public class signshopUtil {
                 } catch(NumberFormatException ex) {
                     eTemp = Enchantment.getByName(sEnchantment[0]);
                 }
-                if(eTemp == null)
+                if (eTemp == null)
                     continue;
                 try {
                     iEnchantmentLevel = Integer.parseInt(sEnchantment[1]);
                     mEnchantments.put(eTemp, iEnchantmentLevel);
-                } catch(NumberFormatException ex) { }
+                } catch (NumberFormatException ex) { }
             }
         }
         return mEnchantments;
     }
 
     public static String convertEnchantmentsToString(Map<Enchantment, Integer> aEnchantments) {
-        String sEnchantments = "";
-        Boolean first = true;
-        for(Map.Entry<Enchantment, Integer> entry : aEnchantments.entrySet()) {
-            if(first) first = false;
-            else sEnchantments += ";";
-            sEnchantments += (entry.getKey().getName() + "|" + entry.getValue());
+        StringBuilder sEnchantments = new StringBuilder();
+        boolean first = true;
+        for (Map.Entry<Enchantment, Integer> entry : aEnchantments.entrySet()) {
+            if (first) first = false;
+            else sEnchantments.append(";");
+            sEnchantments.append(entry.getKey().getName()).append("|").append(entry.getValue());
         }
-        return sEnchantments;
+        return sEnchantments.toString();
     }
 
     public static String convertLocationToString(Location loc) {
-        return (loc.getBlockX() + "/" + loc.getBlockY() + "/" + loc.getBlockZ() + "/" + loc.getWorld().getName());
+        return loc.getBlockX() + "/" + loc.getBlockY() + "/" + loc.getBlockZ() + "/" + loc.getWorld().getName();
     }
 
-    public static Location convertStringToLocation(String sLoc, World pWorld) {
+    public static Location convertStringToLocation(String sLoc, World fallbackWorld) {
         String[] sCoords = sLoc.split("/");
-        if(sCoords.length < 3)
+        if (sCoords.length < 3)
             return null;
         try {
-            World world = pWorld;
+            World world = fallbackWorld;
             if(sCoords.length > 3 && Bukkit.getWorld(sCoords[3]) != null)
                 world = Bukkit.getWorld(sCoords[3]);
             Location loc = new Location(world, Double.parseDouble(sCoords[0]), Double.parseDouble(sCoords[1]), Double.parseDouble(sCoords[2]));
             return loc;
-        } catch(NumberFormatException ex) {
+        } catch (NumberFormatException ex) {
             return null;
         }
     }
@@ -187,21 +178,21 @@ public class signshopUtil {
     public static Double getNumberFromLine(Block bSign, int line) {
         Sign sign = (Sign)bSign.getState();
         String XPline = sign.getLines()[line];
-        if(XPline == null)
+        if (XPline == null)
             return 0.0d;
-        return economyUtil.parsePrice(XPline);
+        return EconomyUtil.parsePrice(XPline);
     }
 
     public static List<Integer> getSharePercentages(String line) {
-        List<String> bits = new LinkedList<String>();
-        List<Integer> percentages = new LinkedList<Integer>();
-        if(line == null)
+        List<String> bits = new LinkedList<>();
+        List<Integer> percentages = new LinkedList<>();
+        if (line == null)
             return percentages;
-        if(line.contains("/"))
+        if (line.contains("/"))
             bits = Arrays.asList(line.split("/"));
         else
             bits.add(line);
-        for(int i = 0; i < bits.size() && i < 2; i++) {
+        for (int i = 0; i < bits.size() && i < 2; i++) {
             String bit = bits.get(i);
             try {
                 percentages.add(Integer.parseInt(bit));
@@ -213,172 +204,167 @@ public class signshopUtil {
     }
 
     public static String implode(String[] ary, String delim) {
-        String out = "";
-        if(ary == null)
-            return out;
-        for(int i=0; i<ary.length; i++) {
-            if(i!=0) { out += delim; }
-            out += ary[i];
-        }
-        return out;
+        if (ary == null) return "";
+
+        return String.join(delim, ary);
     }
 
     public static String validateShareSign(List<Block> clickedBlocks, SignShopPlayer ssPlayer) {
-        List<String> blocklocations = new LinkedList<String>();
-        List<Integer> percentages = new LinkedList<Integer>();
-        for(Block sharesign : clickedBlocks) {
-            if(itemUtil.clickedSign(sharesign)) {
+        List<String> blocklocations = new LinkedList<>();
+        List<Integer> percentages = new LinkedList<>();
+        for (Block sharesign : clickedBlocks) {
+            if (ItemUtil.isSign(sharesign)) {
                 Sign sign = (Sign)sharesign.getState();
-                List<Integer> tempperc = signshopUtil.getSharePercentages(sign.getLine(3));
+                List<Integer> tempperc = SignShopUtil.getSharePercentages(sign.getLine(3));
                 percentages.addAll(tempperc);
-                blocklocations.add(signshopUtil.convertLocationToString(sharesign.getLocation()));
-                if(tempperc.size() == 2 && (lineIsEmpty(sign.getLine(1)) || lineIsEmpty(sign.getLine(2))))
+                blocklocations.add(SignShopUtil.convertLocationToString(sharesign.getLocation()));
+                if (tempperc.size() == 2 && (lineIsEmpty(sign.getLine(1)) || lineIsEmpty(sign.getLine(2))))
                     ssPlayer.sendMessage("No usernames have been given on the second and third line so the Share sign will be ignored.");
-                else if(tempperc.size() == 2 && (lineIsEmpty(sign.getLine(1)) || lineIsEmpty(sign.getLine(2))))
+                else if (tempperc.size() == 2 && (lineIsEmpty(sign.getLine(1)) || lineIsEmpty(sign.getLine(2))))
                     ssPlayer.sendMessage("The second percentage will be ignored as only one username is given.");
-                else if(tempperc.size() == 1 && !lineIsEmpty(sign.getLine(2)))
+                else if (tempperc.size() == 1 && !lineIsEmpty(sign.getLine(2)))
                     ssPlayer.sendMessage("The second username will be ignored as only one percentage is given.");
             }
         }
         int sum = 0;
-        for(Integer percentage : percentages) {
+        for (Integer percentage : percentages) {
             if (percentage <= 0) {
                 ssPlayer.sendMessage("Each percentage should be greater than 0, please adjust the number(s) on the fourth line.");
                 return "";
             }
             sum += percentage;
         }
-        if(sum > 100) {
+        if (sum > 100) {
             ssPlayer.sendMessage("Sum of the percentages can never be greater than 100, please adjust the number(s) on the fourth line.");
             return "";
         }
         String[] implodedLocations = new String[blocklocations.size()];
         blocklocations.toArray(implodedLocations);
 
-        return signshopUtil.implode(implodedLocations, SignShopArguments.seperator);
+        return SignShopUtil.implode(implodedLocations, SignShopArguments.seperator);
     }
 
     public static String validateRestrictSign(List<Block> clickedBlocks, SignShopPlayer player) {
-        List<String> blocklocations = new LinkedList<String>();
+        List<String> blocklocations = new LinkedList<>();
         List<String> permGroups = Arrays.asList(Vault.getPermission().getGroups());
-        for(Block restrictedsign : clickedBlocks) {
-            if(itemUtil.clickedSign(restrictedsign)) {
+        for (Block restrictedsign : clickedBlocks) {
+            if (ItemUtil.isSign(restrictedsign)) {
                 Sign sign = (Sign)restrictedsign.getState();
-                Boolean bValidGroup = false;
-                for(int i = 1; i < 4; i++) {
-                    if(!lineIsEmpty(sign.getLine(i)))
+                boolean bValidGroup = false;
+                for (int i = 1; i < 4; i++) {
+                    if (!lineIsEmpty(sign.getLine(i)))
                         bValidGroup = true;
-                    if(!lineIsEmpty(sign.getLine(i)) && !permGroups.contains(sign.getLine(i)))
+                    if (!lineIsEmpty(sign.getLine(i)) && !permGroups.contains(sign.getLine(i)))
                         player.sendMessage("The group " + sign.getLine(i) + " does not currently exist!");
                 }
-                if(bValidGroup)
-                    blocklocations.add(signshopUtil.convertLocationToString(restrictedsign.getLocation()));
+                if (bValidGroup)
+                    blocklocations.add(SignShopUtil.convertLocationToString(restrictedsign.getLocation()));
             }
         }
 
         String[] implodedLocations = new String[blocklocations.size()];
         blocklocations.toArray(implodedLocations);
 
-        return signshopUtil.implode(implodedLocations, SignShopArguments.seperator);
+        return SignShopUtil.implode(implodedLocations, SignShopArguments.seperator);
     }
 
     public static String validateBankSign(List<Block> clickedBlocks, SignShopPlayer player) {
-        List<String> blocklocations = new LinkedList<String>();
-        Map<String, String> messageParts = new LinkedHashMap<String, String>();
+        List<String> blocklocations = new LinkedList<>();
+        Map<String, String> messageParts = new LinkedHashMap<>();
 
-        if(!Vault.getEconomy().hasBankSupport()) {
+        if (!Vault.getEconomy().hasBankSupport()) {
             player.sendMessage(SignShopConfig.getError("no_bank_support", messageParts));
             return "";
         }
 
-        for(Block banksign : clickedBlocks) {
-            if(itemUtil.clickedSign(banksign)) {
+        for (Block banksign : clickedBlocks) {
+            if (ItemUtil.isSign(banksign)) {
                 Sign sign = (Sign)banksign.getState();
                 String bank = sign.getLine(1);
-                if(!Vault.getEconomy().bankBalance(bank).transactionSuccess())
+                if (!Vault.getEconomy().bankBalance(bank).transactionSuccess())
                     player.sendMessage("The bank called " + sign.getLine(1) + " probably does not exist!");
-                else if(!Vault.getEconomy().isBankOwner(bank, player.getName()).transactionSuccess() && !Vault.getEconomy().isBankMember(bank, player.getName()).transactionSuccess()
+                else if (!Vault.getEconomy().isBankOwner(bank, player.getName()).transactionSuccess() && !Vault.getEconomy().isBankMember(bank, player.getName()).transactionSuccess()
                         && !player.isOp()) {
                     messageParts.put("!bank", bank);
                     player.sendMessage(SignShopConfig.getError("not_allowed_to_use_bank", messageParts));
                     continue;
                 }
 
-                blocklocations.add(signshopUtil.convertLocationToString(banksign.getLocation()));
+                blocklocations.add(SignShopUtil.convertLocationToString(banksign.getLocation()));
             }
         }
 
         String[] implodedLocations = new String[blocklocations.size()];
         blocklocations.toArray(implodedLocations);
 
-        return signshopUtil.implode(implodedLocations, SignShopArguments.seperator);
+        return SignShopUtil.implode(implodedLocations, SignShopArguments.seperator);
     }
 
-    public static Boolean restrictedFromUsing(Seller seller, SignShopPlayer player) {
-        List<Block> blocks = signshopUtil.getSignsFromMisc(seller, "restrictedsigns");
-        if(blocks.isEmpty())
+    public static Boolean restrictedFromUsing(Shop shop, SignShopPlayer player) {
+        List<Block> blocks = SignShopUtil.getSignsFromMisc(shop, "restrictedsigns");
+        if (blocks.isEmpty())
             return false;
         List<String> permGroups = Arrays.asList(Vault.getPermission().getGroups());
         List<String> playerGroups = new LinkedList<String>();
-        for(Block restrictedsign : blocks) {
-            if(itemUtil.clickedSign(restrictedsign)) {
+        for (Block restrictedsign : blocks) {
+            if (ItemUtil.isSign(restrictedsign)) {
                 Sign sign = (Sign)restrictedsign.getState();
-                for(int i = 1; i < 4; i++) {
-                    if(!lineIsEmpty(sign.getLine(i)) && !permGroups.contains(sign.getLine(i))) {
+                for (int i = 1; i < 4; i++) {
+                    if (!lineIsEmpty(sign.getLine(i)) && !permGroups.contains(sign.getLine(i))) {
                         player.sendMessage("The group " + sign.getLine(i) + " does not currently exist!");
-                    } else if(!lineIsEmpty(sign.getLine(i)) && permGroups.contains(sign.getLine(i))) {
+                    } else if (!lineIsEmpty(sign.getLine(i)) && permGroups.contains(sign.getLine(i))) {
                         playerGroups.add(sign.getLine(i));
                     }
                 }
             }
         }
-        for(String group : playerGroups) {
-            if(Vault.playerInGroupAnyWorld(player.getPlayer(), group)) {
+        for (String group : playerGroups) {
+            if (Vault.playerInGroupAnyWorld(player.getPlayer(), group)) {
                 return false;
             }
         }
-        if(playerGroups.size() > 0 && seller.isOwner(player)) {
+        if (playerGroups.size() > 0 && shop.isOwner(player)) {
             player.sendMessage(SignShopConfig.getError("restricted_but_owner", null));
             return false;
         } else
-            return (playerGroups.size() > 0 ? !player.isOp() : false);
+            return playerGroups.size() > 0 && !player.isOp();
     }
 
     public static Boolean lineIsEmpty(String line) {
         return (line == null || line.length() == 0);
     }
 
-    public static List<Block> getSignsFromMisc(Seller seller, String miscprop) {
+    public static List<Block> getSignsFromMisc(Shop shop, String miscprop) {
         List<Block> signs = new LinkedList<Block>();
-        if(seller.hasMisc(miscprop)) {
-            String imploded = seller.getMisc(miscprop);
+        if (shop.hasMisc(miscprop)) {
+            String imploded = shop.getMisc(miscprop);
             String[] exploded;
-            if(imploded.contains(SignShopArguments.seperator))
+            if (imploded.contains(SignShopArguments.seperator))
                 exploded = imploded.split(SignShopArguments.seperator);
             else {
                 exploded = new String[1];
                 exploded[0] = imploded;
             }
             List<String> tempList = Arrays.asList(exploded);
-            signs = getBlocksFromLocStringList(tempList, Bukkit.getServer().getWorld(seller.getWorld()));
+            signs = getBlocksFromLocStringList(tempList, Bukkit.getServer().getWorld(shop.getWorld()));
         }
         return signs;
     }
 
     public static List<Block> getBlocksFromLocStringList(List<String> sLocs, World world) {
         List<Block> blocklist = new LinkedList<Block>();
-        for(String loc : sLocs) {
-            Location temp = signshopUtil.convertStringToLocation(loc, world);
-            if(temp != null)
+        for (String loc : sLocs) {
+            Location temp = SignShopUtil.convertStringToLocation(loc, world);
+            if (temp != null)
                 blocklist.add(temp.getBlock());
         }
         return blocklist;
     }
 
-    public static List<Entity> getEntitiesFromMisc(Seller seller, String miscprop) {
-        List<Entity> entities = new LinkedList<Entity>();
-        if(seller.hasMisc(miscprop)) {
-            String imploded = seller.getMisc(miscprop);
+    public static List<Entity> getEntitiesFromMisc(Shop shop, String miscprop) {
+        List<Entity> entities = new LinkedList<>();
+        if (shop.hasMisc(miscprop)) {
+            String imploded = shop.getMisc(miscprop);
             String[] exploded;
             if(imploded.contains(SignShopArguments.seperator))
                 exploded = imploded.split(SignShopArguments.seperator);
@@ -387,19 +373,19 @@ public class signshopUtil {
                 exploded[0] = imploded;
             }
             List<String> tempList = Arrays.asList(exploded);
-            entities = getEntitiesFromLocStringList(tempList, Bukkit.getServer().getWorld(seller.getWorld()));
+            entities = getEntitiesFromLocStringList(tempList, Bukkit.getServer().getWorld(shop.getWorld()));
         }
         return entities;
     }
 
     public static List<Entity> getEntitiesFromLocStringList(List<String> sLocs, World world) {
-        List<Entity> entities = new LinkedList<Entity>();
+        List<Entity> entities = new LinkedList<>();
         List<Entity> worldEntities = world.getEntities();
-        for(String loc : sLocs) {
-            Location temp = signshopUtil.convertStringToLocation(loc, world);
-            if(temp != null) {
-                for(Entity ent : worldEntities) {
-                    if(signshopUtil.roughLocationCompare(temp, ent.getLocation())) {
+        for (String loc : sLocs) {
+            Location temp = SignShopUtil.convertStringToLocation(loc, world);
+            if (temp != null) {
+                for (Entity ent : worldEntities) {
+                    if (SignShopUtil.roughLocationCompare(temp, ent.getLocation())) {
                         entities.add(ent);
                     }
                 }
@@ -408,21 +394,27 @@ public class signshopUtil {
         return entities;
     }
 
-    public static Boolean clickedSignShopMat(Block bBlock, SignShopPlayer ssPlayer) {
-        return clickedSignShopMat(bBlock.getType().toString(), bBlock.getData(), ssPlayer);
+    public static boolean clickedSignShopMat(Block bBlock, SignShopPlayer ssPlayer) {
+        return clickedSignShopMat(bBlock.getType(), ssPlayer);
     }
 
-    public static Boolean clickedSignShopMat(Entity eEntity, SignShopPlayer ssPlayer) {
-        return clickedSignShopMat(eEntity.getType().toString(), (short)-1, ssPlayer);
+    //did the original author plan to have npc's as a way of interacting?! :O :D
+    @Deprecated
+    public static boolean clickedSignShopMat(Entity eEntity, SignShopPlayer ssPlayer) {
+        return clickedSignShopMat(eEntity.getType().toString(), ssPlayer);
     }
 
-    public static Boolean clickedSignShopMat(String mat, short dur, SignShopPlayer ssPlayer) {
+    public static boolean clickedSignShopMat(Material material, SignShopPlayer ssPlayer) {
+        return clickedSignShopMat(material.name(), ssPlayer);
+    }
+
+    public static boolean clickedSignShopMat(String mat, SignShopPlayer ssPlayer) {
         String materialName = null;
-        for(LinkableMaterial linkable : SignShopConfig.getLinkableMaterials()) {
-            if((linkable.getData() == -1 || linkable.getData() == dur) && linkable.getMaterialName().equalsIgnoreCase(mat))
+        for (LinkableMaterial linkable : SignShopConfig.getLinkableMaterials()) {
+            if (linkable.getMaterialName().equalsIgnoreCase(mat))
                 materialName = linkable.getAlias();
         }
-        if(materialName != null) {
+        if (materialName != null) {
             if(materialName.isEmpty()) // Leaving the alias empty probably means denylink shouldn't be checked
                 return true;
             if(!ssPlayer.isOp() && ssPlayer.hasPerm("SignShop.DenyLink." + materialName, true) && !ssPlayer.hasPerm("SignShop.AllowLink." + materialName, true)) {
@@ -438,33 +430,41 @@ public class signshopUtil {
         return registerClickedMaterial(event, event.getPlayer(), event.getClickedBlock());
     }
 
-    public static Boolean registerClickedMaterial(Cancellable event, Player player, Block clickedBlock) {
+    public static boolean registerClickedMaterial(Cancellable event, Player player, Block clickedBlock) {
         SignShopPlayer ssPlayer = new SignShopPlayer(player);
-        Boolean signshopMat = registerClickedMaterial(clickedBlock, ssPlayer);
-        if(signshopMat)
+        boolean signshopMat = registerClickedMaterial(clickedBlock, ssPlayer);
+        if (signshopMat)
             event.setCancelled(true);
         return signshopMat;
     }
 
-    public static Boolean registerClickedMaterial(Block bClicked, SignShopPlayer ssPlayer) {
-        if(clickedSignShopMat(bClicked, ssPlayer)) {
-            if(clicks.mClicksPerLocation.containsKey(bClicked.getLocation())) {
-                clicks.mClicksPerLocation.remove(bClicked.getLocation());
+    public static boolean registerClickedMaterial(Block clickedBlock, SignShopPlayer ssPlayer) {
+        if (clickedSignShopMat(clickedBlock, ssPlayer)) {
+            //SignShop.getInstance().getLogger().info("DEBUG registerClickedMaterial - clicked linkable material");
+
+            if (Clicks.mClicksPerLocation.containsKey(clickedBlock.getLocation())) {
+                //SignShop.getInstance().getLogger().info("DEBUG registerClickedMaterial - mClickPerLocation = true");
+
+                Clicks.mClicksPerLocation.remove(clickedBlock.getLocation());
                 ssPlayer.sendMessage(SignShopConfig.getError("removed_location", null));
             } else {
-                SSLinkEvent event = SSEventFactory.generateLinkEvent(bClicked, ssPlayer, null);
-                SignShop.scheduleEvent(event);
-                if(event.isCancelled())
+                //SignShop.getInstance().getLogger().info("DEBUG registerClickedMaterial - mClickPerLocation = false");
+
+                SSLinkEvent event = SSEventFactory.generateLinkEvent(clickedBlock, ssPlayer, null);
+                SignShop.callEvent(event);
+                if (event.isCancelled()) {
+                    SignShop.getInstance().getLogger().info("DEBUG registerClickedMaterial - SSLinkEvent got cancelled!");
                     return false;
-                else {
-                    clicks.mClicksPerLocation.put(bClicked.getLocation(), ssPlayer.getPlayer());
-                    Map<String, String> messageParts = new LinkedHashMap<String, String>();
-                    messageParts.put("!block", itemUtil.formatData(bClicked.getState().getData()));
-                    if(bClicked.getState() instanceof InventoryHolder) {
-                        List<Block> containables = new LinkedList<Block>();
-                        containables.add(bClicked);
-                        ItemStack[] allStacks = itemUtil.getAllItemStacksForContainables(containables);
-                        messageParts.put("!items", (allStacks.length == 0 ? "nothing" : itemUtil.itemStackToString(allStacks)));
+                } else {
+                    //SignShop.getInstance().getLogger().info("DEBUG registerClickedMaterial - SSLinkEvent is not cancelled, doing stuff!");
+                    Clicks.mClicksPerLocation.put(clickedBlock.getLocation(), ssPlayer.getPlayer());
+                    Map<String, String> messageParts = new LinkedHashMap<>();
+                    messageParts.put("!block", ItemUtil.formatData(clickedBlock.getBlockData()));
+                    if (clickedBlock.getState() instanceof InventoryHolder) {
+                        List<Block> containables = new LinkedList<>();
+                        containables.add(clickedBlock);
+                        ItemStack[] allStacks = ItemUtil.getAllItemStacksForContainables(containables);
+                        messageParts.put("!items", (allStacks.length == 0 ? "nothing" : ItemUtil.itemStackToString(allStacks)));
                         ssPlayer.sendMessage(SignShopConfig.getError("stored_location_containable", messageParts));
                     } else {
                         ssPlayer.sendMessage(SignShopConfig.getError("stored_location", messageParts));
@@ -476,43 +476,50 @@ public class signshopUtil {
         return false;
     }
 
-    public static double ApplyPriceMod(SignShopArguments ssArgs, boolean bBuyOperation) {
-        if(ssArgs.tryToApplyPriceMod()) {
-            double fPrice = ApplyPriceMod(ssArgs.getPlayer().get(), ssArgs.getPrice().get(), ssArgs.getOperation().get(), bBuyOperation);
+    public static double applyPriceMod(SignShopArguments ssArgs, boolean bBuyOperation) {
+        if (ssArgs.tryToApplyPriceMod()) {
+            double fPrice;
+            if (ssArgs.hasPlayer()) {
+                fPrice = applyPriceMod(ssArgs.getPlayer().get(), ssArgs.getPrice().get(), ssArgs.getOperation().get(), bBuyOperation);
+            } else {
+                fPrice = applyPriceMod(null, ssArgs.getPrice().get(), ssArgs.getOperation().get(), bBuyOperation);
+            }
             ssArgs.getPrice().set(fPrice);
-            ssArgs.setMessagePart("!price", economyUtil.formatMoney(fPrice));
+            ssArgs.setMessagePart("!price", EconomyUtil.formatMoney(fPrice));
         }
         return ssArgs.getPrice().get();
     }
 
-    public static double ApplyPriceMod(SignShopPlayer player, double fPrice, String sOperation, boolean bBuyOperation) {
+    public static double applyPriceMod(SignShopPlayer player, double fPrice, String sOperation, boolean bBuyOperation) {
+        if (player == null) return fPrice;
+
         double fPricemod = player.getPlayerPricemod(sOperation, bBuyOperation);
         return (fPrice * fPricemod);
     }
 
     public static boolean getSignshopBlocksFromList(SignShopPlayer ssPlayer, List<Block> containables, List<Block> activatables, Block bClicked) {
-        Boolean multiWorld = false;
-        LinkedHashSet<Location> lClicked = getKeysByValue(clicks.mClicksPerLocation, ssPlayer.getPlayer());
+        boolean multiWorld = false;
+        Set<Location> lClicked = getKeysByValue(Clicks.mClicksPerLocation, ssPlayer.getPlayer());
         int chestCounter = 0;
         for (Location loc : lClicked) {
             Block bBlockat = loc.getBlock();
-            if(bBlockat.getLocation().equals(bClicked.getLocation()))
+            if (bBlockat.getLocation().equals(bClicked.getLocation()))
                 continue;
             if (bBlockat.getState() instanceof InventoryHolder) {
                 containables.add(bBlockat);
 
                 chestCounter++;
                 boolean exceeded = SignShopConfig.ExceedsMaxChestsPerShop(chestCounter);
-                if(exceeded) {
-                    Map<String, String> parts = new LinkedHashMap<String, String>();
+                if (exceeded) {
+                    Map<String, String> parts = new LinkedHashMap<>();
                     parts.put("!maxAmountOfChests", Integer.toString(SignShopConfig.getMaxChestsPerShop()));
                     ssPlayer.sendMessage(SignShopConfig.getError("exceeded_max_amount_of_chests_per_shop", parts));
                     return false;
                 }
-            } else if (signshopUtil.clickedSignShopMat(bBlockat, ssPlayer)) {
+            } else if (SignShopUtil.clickedSignShopMat(bBlockat, ssPlayer)) {
                 activatables.add(bBlockat);
-                if(itemUtil.clickedDoor(bBlockat)) {
-                    Block otherpart = itemUtil.getOtherDoorPart(bBlockat);
+                if(ItemUtil.isDoor(bBlockat)) {
+                    Block otherpart = ItemUtil.getOtherDoorPart(bBlockat);
                     if(otherpart != null)
                         activatables.add(otherpart);
                 }
@@ -529,36 +536,40 @@ public class signshopUtil {
         return true;
     }
 
-    public static List<Seller> getShopsFromMiscSetting(String miscname, Block pBlock) {
-        List<Block> shopsWithBlockInMisc = Storage.get().getShopsWithMiscSetting(miscname, signshopUtil.convertLocationToString(pBlock.getLocation()));
-        List<Seller> sellers = new LinkedList<Seller>();
-        if(!shopsWithBlockInMisc.isEmpty()) {
-            for(Block block : shopsWithBlockInMisc) {
-                sellers.add(Storage.get().getSeller(block.getLocation()));
+    public static List<Shop> getShopsFromMiscSetting(String miscname, Block pBlock) {
+        List<Block> shopsWithBlockInMisc = Storage.get().getShopsWithMiscSetting(miscname, SignShopUtil.convertLocationToString(pBlock.getLocation()));
+        List<Shop> shops = new LinkedList<>();
+        if (!shopsWithBlockInMisc.isEmpty()) {
+            for (Block block : shopsWithBlockInMisc) {
+                shops.add(Storage.get().getShop(block.getLocation()));
             }
         }
-        return sellers;
+        return shops;
     }
 
-    public static Map<Seller, SSDestroyedEventType> getRelatedShopsByBlock(Block block) {
-        Map<Seller, SSDestroyedEventType> affectedSellers = new LinkedHashMap<Seller, SSDestroyedEventType>();
+    public static Map<Shop, SSDestroyedEventType> getRelatedShopsByBlock(Block block) {
+        Map<Shop, SSDestroyedEventType> affectedShops = new LinkedHashMap<>();
 
-        if(Storage.get().getSeller(block.getLocation()) != null)
-            affectedSellers.put(Storage.get().getSeller(block.getLocation()), SSDestroyedEventType.sign);
-        if(itemUtil.clickedSign(block)) {
-            for(Seller seller : getShopsFromMiscSetting("sharesigns", block))
-                affectedSellers.put(seller, SSDestroyedEventType.miscblock);
-            for(Seller seller : getShopsFromMiscSetting("restrictedsigns", block))
-                affectedSellers.put(seller, SSDestroyedEventType.miscblock);
+        if (Storage.get().getShop(block.getLocation()) != null)
+            affectedShops.put(Storage.get().getShop(block.getLocation()), SSDestroyedEventType.SIGN);
+        if (ItemUtil.isSign(block)) {
+            for (Shop shop : getShopsFromMiscSetting("sharesigns", block))
+                affectedShops.put(shop, SSDestroyedEventType.MISC_BLOCK);
+            for (Shop shop : getShopsFromMiscSetting("restrictedsigns", block))
+                affectedShops.put(shop, SSDestroyedEventType.MISC_BLOCK);
         }
-        for(Seller seller : Storage.get().getShopsByBlock(block))
-            affectedSellers.put(seller, SSDestroyedEventType.attachable);
+        for (Shop shop : Storage.get().getShopsByBlock(block))
+            affectedShops.put(shop, SSDestroyedEventType.ATTACHABLE);
 
-        return affectedSellers;
+        return affectedShops;
     }
 
-    public static <T, E> LinkedHashSet<T> getKeysByValue(Map<T, E> map, E value) {
-        LinkedHashSet<T> keys = new LinkedHashSet<T>();
+    /**
+     * @deprecated poor performance - should be using a BiMap instead.
+     */
+    @Deprecated
+    public static <T, E> Set<T> getKeysByValue(Map<T, E> map, E value) {
+        Set<T> keys = new LinkedHashSet<T>();
         for (Map.Entry<T, E> entry : map.entrySet()) {
             if (value.equals(entry.getValue())) {
                 keys.add(entry.getKey());
@@ -567,32 +578,29 @@ public class signshopUtil {
         return keys;
     }
 
-    public static Boolean checkDistance(Block a, Block b, int maxdistance) {
-        if (maxdistance <= 0) {
+    public static boolean checkDistance(Block a, Block b, int maxDistance) {
+        if (maxDistance <= 0) {
             return true;
         }
-        int xdiff = Math.abs(a.getX() - b.getX());
-        int ydiff = Math.abs(a.getY() - b.getY());
-        int zdiff = Math.abs(a.getZ() - b.getZ());
-        if (xdiff > maxdistance || ydiff > maxdistance || zdiff > maxdistance) {
-            return false;
-        } else {
-            return true;
-        }
+        int xDiff = Math.abs(a.getX() - b.getX());
+        int yDiff = Math.abs(a.getY() - b.getY());
+        int zDiff = Math.abs(a.getZ() - b.getZ());
+
+        return xDiff <= maxDistance && yDiff <= maxDistance && zDiff <= maxDistance;
     }
 
     public static String capFirstLetter(final String string) {
-        if(string == null || string.isEmpty())
-            return string;
+        if (string == null || string.isEmpty()) return string;
+
         String workwith = string.replace("_", " ");
         String[] spacesplit;
-        if(workwith.contains(" "))
+        if (workwith.contains(" ")) {
             spacesplit = workwith.split(" ");
-        else {
+        } else {
             spacesplit = new String[1];
             spacesplit[0] = workwith;
         }
-        for(int i = 0; i < spacesplit.length; i++) {
+        for (int i = 0; i < spacesplit.length; i++) {
             char[] arr = spacesplit[i].toCharArray();
             arr[0] = Character.toUpperCase(arr[0]);
             spacesplit[i] = new String(arr);
@@ -601,7 +609,7 @@ public class signshopUtil {
     }
 
     public static boolean hasOPForCommand(SignShopPlayer player) {
-        if(player != null && !player.isOp()) {
+        if (player != null && !player.isOp()) {
             player.sendMessage(SignShopConfig.getError("must_be_op_to_run", null));
             return false;
         }
@@ -609,20 +617,21 @@ public class signshopUtil {
         return true;
     }
 
-    public static boolean doublesAsInts(double DoubleA, double DoubleB) {
-        return (Math.floor(DoubleA) == Math.floor(DoubleB));
+    public static boolean floorEquals(double doubleA, double doubleB) {
+        return ((int) doubleA) == ((int) doubleB);
     }
 
     public static boolean roughLocationCompare(Location locA, Location locB) {
-        return (doublesAsInts(locA.getX(), locB.getX()) && doublesAsInts(locA.getY(), locB.getY()) && doublesAsInts(locA.getZ(), locB.getZ()));
+        return (floorEquals(locA.getX(), locB.getX()) && floorEquals(locA.getY(), locB.getY()) && floorEquals(locA.getZ(), locB.getZ()));
     }
 
     public static double calculateDurabilityModifier(ItemStack[] stacks) {
-        if(stacks.length == 0)
+        if (stacks.length == 0)
             return 1.0f;
+
         double totalmod = 0.0f;
         double totalamount = 0;
-        for(ItemStack stack : stacks) {
+        for (ItemStack stack : stacks) {
             double dur = stack.getDurability();
             double max = stack.getType().getMaxDurability();
             double amount = stack.getAmount();
@@ -641,12 +650,14 @@ public class signshopUtil {
      */
     public static String getParam(SignShopArguments ssArgs) {
         String rawparam = ssArgs.getOperation().get().toLowerCase();
-        if(ssArgs.hasOperationParameters())
+        if (ssArgs.hasOperationParameters())
             rawparam = ssArgs.getFirstOperationParameter().toLowerCase();
+
         rawparam = SignShopConfig.fillInBlanks(rawparam, ssArgs.getMessageParts());
         rawparam = SignShopConfig.fillInBlanks(rawparam, ssArgs.getMessageParts());
-        if(rawparam != null && !rawparam.isEmpty())
+        if (rawparam != null && !rawparam.isEmpty())
             ssArgs.setMessagePart("!param", rawparam);
+
         return rawparam;
     }
 }

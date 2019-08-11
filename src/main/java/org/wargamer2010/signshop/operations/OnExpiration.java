@@ -7,7 +7,7 @@ import java.util.logging.Level;
 import org.wargamer2010.signshop.SignShop;
 import org.wargamer2010.signshop.events.SSEvent;
 import org.wargamer2010.signshop.events.SSExpiredEvent;
-import org.wargamer2010.signshop.util.signshopUtil;
+import org.wargamer2010.signshop.util.SignShopUtil;
 
 public class OnExpiration extends SignShopEventHandler {
 
@@ -22,7 +22,7 @@ public class OnExpiration extends SignShopEventHandler {
             return null;
         }
 
-        List<SignShopOperationListItem> blocks = signshopUtil.getSignShopOps(
+        List<SignShopOperationListItem> blocks = SignShopUtil.getSignShopOps(
                 Arrays.asList(new String[] { ssArgs.getFirstOperationParameter() })
         );
 

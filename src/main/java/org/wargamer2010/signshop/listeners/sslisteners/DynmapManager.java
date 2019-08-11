@@ -15,14 +15,14 @@ import org.dynmap.markers.Marker;
 import org.dynmap.markers.MarkerAPI;
 import org.dynmap.markers.MarkerIcon;
 import org.dynmap.markers.MarkerSet;
-import org.wargamer2010.signshop.Seller;
+import org.wargamer2010.signshop.Shop;
 import org.wargamer2010.signshop.SignShop;
 import org.wargamer2010.signshop.configuration.SignShopConfig;
 import org.wargamer2010.signshop.configuration.Storage;
 import org.wargamer2010.signshop.events.SSCreatedEvent;
 import org.wargamer2010.signshop.events.SSDestroyedEvent;
 import org.wargamer2010.signshop.events.SSDestroyedEventType;
-import org.wargamer2010.signshop.util.signshopUtil;
+import org.wargamer2010.signshop.util.SignShopUtil;
 
 public class DynmapManager implements Listener {
     private DynmapAPI dynmapAPI = null;
@@ -92,20 +92,20 @@ public class DynmapManager implements Listener {
         if(mi == null)
             mi = markerAPI.getMarkerIcon("sign");
 
-        for(Seller seller : Storage.get().getSellers()) {
-            ManageMarkerForSeller(seller, false);
+        for(Shop shop : Storage.get().getShops()) {
+            ManageMarkerForSeller(shop, false);
         }
     }
 
-    private void ManageMarkerForSeller(Seller seller, boolean remove) {
-        ManageMarkerForSeller(seller.getSignLocation(), seller.getOwner().getName(), seller.getWorld(), remove);
+    private void ManageMarkerForSeller(Shop shop, boolean remove) {
+        ManageMarkerForSeller(shop.getSignLocation(), shop.getOwner().getName(), shop.getWorld(), remove);
     }
 
     private void ManageMarkerForSeller(Location loc, String owner, String world, boolean remove) {
         if(ms == null)
             return;
 
-        String id = ("SignShop_" + signshopUtil.convertLocationToString(loc).replace(".", ""));
+        String id = ("SignShop_" + SignShopUtil.convertLocationToString(loc).replace(".", ""));
         String label = (owner + "'s SignShop");
 
         Marker m = ms.findMarker(id);
@@ -126,7 +126,7 @@ public class DynmapManager implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onSSDestroyCleanup(SSDestroyedEvent event) {
-        if(event.isCancelled() || event.getReason() != SSDestroyedEventType.sign)
+        if(event.isCancelled() || event.getReason() != SSDestroyedEventType.SIGN)
             return;
 
         ManageMarkerForSeller(event.getShop(), true);

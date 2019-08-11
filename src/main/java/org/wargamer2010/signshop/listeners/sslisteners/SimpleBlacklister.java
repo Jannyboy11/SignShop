@@ -10,7 +10,7 @@ import org.wargamer2010.signshop.configuration.SignShopConfig;
 import org.wargamer2010.signshop.events.SSCreatedEvent;
 import org.wargamer2010.signshop.events.SSPreTransactionEvent;
 import org.wargamer2010.signshop.player.SignShopPlayer;
-import org.wargamer2010.signshop.util.itemUtil;
+import org.wargamer2010.signshop.util.ItemUtil;
 
 public class SimpleBlacklister implements Listener {
 
@@ -19,7 +19,7 @@ public class SimpleBlacklister implements Listener {
             return false;
         ItemStack blacklisted = SignShopConfig.isAnyItemOnBlacklist(isItems);
         if(blacklisted != null) {
-            messageParts.put("!blacklisted_item", itemUtil.itemStackToString(new ItemStack[]{ blacklisted }));
+            messageParts.put("!blacklisted_item", ItemUtil.itemStackToString(new ItemStack[]{ blacklisted }));
 
             if(ssPlayer.isOp()) {
                 if(SignShopConfig.getUseBlacklistAsWhitelist())

@@ -1,19 +1,17 @@
 
 package org.wargamer2010.signshop.player;
 
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.wargamer2010.signshop.configuration.SignShopConfig;
-import org.wargamer2010.signshop.util.itemUtil;
+import org.wargamer2010.signshop.util.ItemUtil;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static org.wargamer2010.signshop.util.itemUtil.StackToMap;
-import static org.wargamer2010.signshop.util.itemUtil.getBackupItemStack;
+import static org.wargamer2010.signshop.util.ItemUtil.stacksToMap;
+import static org.wargamer2010.signshop.util.ItemUtil.getBackupItemStack;
 
 /**
  * Wraps a real inventory and allows for "virtual" operations to be executed which means it doesn't actually touch the inventory
@@ -32,14 +30,14 @@ public class VirtualInventory {
      */
     public HashMap<ItemStack[], Double> variableAmount(ItemStack[] isItemsToTake) {
         ItemStack[] isBackup = getBackupItemStack(isItemsToTake);
-        HashMap<ItemStack[], Double> returnMap = new HashMap<ItemStack[], Double>();
+        HashMap<ItemStack[], Double> returnMap = new HashMap<>();
         returnMap.put(isItemsToTake, 1.0d);
-        Boolean fromOK = hasItems(isBackup);
+        boolean fromOK = hasItems(isBackup);
 
-        if(fromOK) {
+        if (fromOK) {
             returnMap.put(isItemsToTake, 1.0d);
             return returnMap;
-        } else if(!SignShopConfig.getAllowVariableAmounts() && !fromOK) {
+        } else if (!SignShopConfig.getAllowVariableAmounts()) {
             returnMap.put(isItemsToTake, 0.0d);
             return returnMap;
         }
@@ -47,20 +45,20 @@ public class VirtualInventory {
         double iCount = 0;
         double tempCount;
         int i = 0;
-        HashMap<ItemStack, Integer> mItemsToTake = StackToMap(isBackup);
-        HashMap<ItemStack, Integer> mInventory = StackToMap(inventory.getContents());
+        HashMap<ItemStack, Integer> mItemsToTake = stacksToMap(isBackup);
+        HashMap<ItemStack, Integer> mInventory = stacksToMap(inventory.getContents());
         ItemStack[] isActual = new ItemStack[mItemsToTake.size()];
-        for(Map.Entry<ItemStack, Integer> entry : mItemsToTake.entrySet()) {
-            if(iCount == 0 && mInventory.containsKey(entry.getKey()))
+        for (Map.Entry<ItemStack, Integer> entry : mItemsToTake.entrySet()) {
+            if (iCount == 0 && mInventory.containsKey(entry.getKey()))
                 iCount = ((double)mInventory.get(entry.getKey()) / (double)entry.getValue());
-            else if(iCount != 0 && mInventory.containsKey(entry.getKey())) {
+            else if (iCount != 0 && mInventory.containsKey(entry.getKey())) {
                 tempCount = ((double)mInventory.get(entry.getKey()) / (double)entry.getValue());
-                if(tempCount != iCount)
+                if (tempCount != iCount)
                     return returnMap;
             } else
                 return returnMap;
 
-            isActual[i] = itemUtil.getBackupSingleItemStack(entry.getKey());
+            isActual[i] = ItemUtil.getBackupItemStack(entry.getKey());
             isActual[i].setAmount(mInventory.get(entry.getKey()));
 
             i++;
@@ -78,7 +76,7 @@ public class VirtualInventory {
      */
     public boolean isStockOK(ItemStack[] isItemsToTake, boolean bTakeOrGive) {
         try {
-            if(bTakeOrGive)
+            if (bTakeOrGive)
                 return hasItems(isItemsToTake);
             else
                 return canTakeItems(isItemsToTake);
@@ -96,12 +94,12 @@ public class VirtualInventory {
     public boolean hasItems(ItemStack[] isItemsToTake) {
         ItemStack[] isBackup = getBackupItemStack(isItemsToTake);
 
-        HashMap<ItemStack, Integer> mItemsToTake = StackToMap(isBackup);
-        HashMap<ItemStack, Integer> mInventory = StackToMap(inventory.getContents());
+        HashMap<ItemStack, Integer> mItemsToTake = stacksToMap(isBackup);
+        HashMap<ItemStack, Integer> mInventory = stacksToMap(inventory.getContents());
 
-        for(Map.Entry<ItemStack, Integer> entry : mItemsToTake.entrySet()) {
-            if(mInventory.containsKey(entry.getKey())) {
-                if(mInventory.get(entry.getKey()) < entry.getValue()) {
+        for (Map.Entry<ItemStack, Integer> entry : mItemsToTake.entrySet()) {
+            if (mInventory.containsKey(entry.getKey())) {
+                if (mInventory.get(entry.getKey()) < entry.getValue()) {
                     return false;
                 }
             } else {
@@ -170,8 +168,12 @@ public class VirtualInventory {
     private int findSpace(ItemStack item, Map<Integer, StackWithAmount> lookaside, boolean findEmpty) {
         // 1.9.4 and later extend living entity slots beyond 36, but some of these are read-only.
         // We could use .getStorageContents(), but this breaks 1.8.8 compatibility
-        int length = (inventory.getHolder() instanceof HumanEntity) ? 36 : inventory.getSize();
-        ItemStack[] stacks = Arrays.copyOfRange(inventory.getContents(), 0, length);
+
+        // yeah since we are on 1.14.4 I'm not going to bother with 1.8 compatibility - Jan
+        //        int length = (inventory.getHolder() instanceof HumanEntity) ? 36 : inventory.getSize();
+        //        ItemStack[] stacks = Arrays.copyOfRange(inventory.getContents(), 0, length);
+
+        ItemStack[] stacks = inventory.getStorageContents();
 
         if (item == null) {
             return -1;
@@ -181,7 +183,7 @@ public class VirtualInventory {
             boolean contains = lookaside.containsKey(i);
             if(findEmpty && !contains) {
                 return i;
-            } else if(!findEmpty && contains) {
+            } else if (!findEmpty && contains) {
                 StackWithAmount compareWith = lookaside.get(i);
                 if(compareWith != null) {
                     ItemStack compareWithStack = compareWith.getStack();
@@ -196,13 +198,14 @@ public class VirtualInventory {
     }
 
     private Map<Integer, StackWithAmount> getAmountsMapping() {
-        Map<Integer, StackWithAmount> map = new LinkedHashMap<Integer, StackWithAmount>();
+        Map<Integer, StackWithAmount> map = new LinkedHashMap<>();
         ItemStack[] stacks = inventory.getContents();
 
-        for(int i = 0; i < stacks.length; i++) {
+        for (int i = 0; i < stacks.length; i++) {
             ItemStack stack = stacks[i];
-            if(stack != null)
+            if (stack != null) {
                 map.put(i, new StackWithAmount(stack.getAmount(), stack));
+            }
         }
 
         return map;

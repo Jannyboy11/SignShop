@@ -9,14 +9,14 @@ import org.bukkit.event.block.Action;
 import org.bukkit.inventory.InventoryHolder;
 import org.wargamer2010.signshop.events.SSCreatedEvent;
 import org.wargamer2010.signshop.events.SSTouchShopEvent;
-import org.wargamer2010.signshop.util.itemUtil;
+import org.wargamer2010.signshop.util.ItemUtil;
 
 public class ShopUpdater implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onSSPostCreatedEvent(SSCreatedEvent event) {
         if(!event.isCancelled())
-            itemUtil.setSignStatus(event.getSign(), ChatColor.DARK_BLUE);
+            ItemUtil.setSignStatus(event.getSign(), ChatColor.DARK_BLUE);
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -25,7 +25,7 @@ public class ShopUpdater implements Listener {
             return;
 
         if(event.getAction() == Action.LEFT_CLICK_BLOCK && event.getBlock().getState() instanceof InventoryHolder) {
-            itemUtil.updateStockStatusPerShop(event.getShop());
+            ItemUtil.updateStockStatusPerShop(event.getShop());
         }
     }
 }

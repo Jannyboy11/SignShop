@@ -3,10 +3,10 @@ package org.wargamer2010.signshop.metrics;
 import org.bukkit.plugin.Plugin;
 import java.io.IOException;
 
-public class setupMetrics {
+public class SetupMetrics {
     private Metrics metrics = null;
 
-    public setupMetrics(Plugin pPlugin) {
+    public SetupMetrics(Plugin pPlugin) {
         try {
             metrics = new Metrics(pPlugin);
         } catch(IOException ex) {

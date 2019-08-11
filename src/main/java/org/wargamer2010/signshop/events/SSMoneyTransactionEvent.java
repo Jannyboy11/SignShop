@@ -4,7 +4,7 @@ import java.util.Map;
 import org.bukkit.block.Block;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
-import org.wargamer2010.signshop.Seller;
+import org.wargamer2010.signshop.Shop;
 import org.wargamer2010.signshop.configuration.SignShopConfig;
 import org.wargamer2010.signshop.operations.SignShopArguments;
 import org.wargamer2010.signshop.player.SignShopPlayer;
@@ -14,7 +14,7 @@ public class SSMoneyTransactionEvent extends SSEvent implements IOperationEvent 
 
     private SignShopPlayer ssPlayer = null;
     private Block bBlock = null;
-    private Seller seShop = null;
+    private Shop seShop = null;
     private double fAmount;
     private Block bSign = null;
     private String sOperation = "";
@@ -25,8 +25,8 @@ public class SSMoneyTransactionEvent extends SSEvent implements IOperationEvent 
     private boolean bHandled = false;
     private SignShopArguments ssArgs = null;
 
-    public SSMoneyTransactionEvent(SignShopPlayer pPlayer, Seller pShop, double pAmount, Block pSign, String pOperation, ItemStack[] pItems,
-            boolean leftClicking, SSMoneyEventType pType, Map<String, String> pMessageParts, SSMoneyRequestType pRequestType) {
+    public SSMoneyTransactionEvent(SignShopPlayer pPlayer, Shop pShop, double pAmount, Block pSign, String pOperation, ItemStack[] pItems,
+                                   boolean leftClicking, SSMoneyEventType pType, Map<String, String> pMessageParts, SSMoneyRequestType pRequestType) {
         super(pMessageParts);
         ssPlayer = pPlayer;
         seShop = pShop;
@@ -58,7 +58,7 @@ public class SSMoneyTransactionEvent extends SSEvent implements IOperationEvent 
     }
 
     @Override
-    public Seller getShop() {
+    public Shop getShop() {
         return seShop;
     }
 

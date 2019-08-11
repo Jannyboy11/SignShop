@@ -4,21 +4,19 @@ package org.wargamer2010.signshop.configuration;
 import org.bukkit.Material;
 
 public class LinkableMaterial {
-    private String materialName = Material.AIR.toString();
-    private String alias = "";
-    private byte data = -1; // -1 serves as a wildcard
+    private final String materialName;
+    private final String alias;
 
-    public LinkableMaterial(Material materialName, String alias) {
-        this(materialName, alias, (byte)-1);
+    public LinkableMaterial(Material material) {
+        this(material, material.name());
     }
 
-    public LinkableMaterial(Material materialName, String alias, byte data) {
-        this(materialName.toString(), alias, data);
+    public LinkableMaterial(Material material, String alias) {
+        this(material.name(), alias);
     }
 
-    public LinkableMaterial(String materialName, String alias, byte data) {
+    public LinkableMaterial(String materialName, String alias) {
         this.materialName = materialName;
-        this.data = data;
         this.alias = alias;
     }
 
@@ -30,7 +28,4 @@ public class LinkableMaterial {
         return alias;
     }
 
-    public short getData() {
-        return data;
-    }
 }

@@ -20,7 +20,7 @@ public class SignShopArgument<E> {
         return (isSpecial() ? special : inner); 
     }
 
-    public E getRoot() { 
+    public E getInner() {
         return inner; 
     }
 
@@ -28,7 +28,7 @@ public class SignShopArgument<E> {
         setSpecial(true); special = pSpecial; 
     }
 
-    public void setRoot(E pInner) { 
+    public void setInner(E pInner) {
         inner = pInner; 
     }
 
@@ -41,10 +41,17 @@ public class SignShopArgument<E> {
     }
 
     public boolean isEmpty() {
-        if(get() instanceof Collection)
-            return ((Collection)get()).isEmpty();
-        else if(get() instanceof String)
-            return ((String)get()).isEmpty();            
-        return false;
+        E got = get();
+        if (got instanceof Collection) {
+            Collection coll = (Collection) got;
+            return coll.isEmpty();
+        }
+        else if (got instanceof String) {
+            String string = (String) got;
+            return string.isEmpty();
+        }
+        else {
+            return got == null;
+        }
     }
 }

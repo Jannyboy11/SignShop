@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.Arrays;
 import org.wargamer2010.signshop.SignShop;
-import org.wargamer2010.signshop.util.itemUtil;
-import org.wargamer2010.signshop.Seller;
+import org.wargamer2010.signshop.util.ItemUtil;
+import org.wargamer2010.signshop.Shop;
 import org.wargamer2010.signshop.configuration.SignShopConfig;
 import static org.wargamer2010.signshop.operations.SignShopArguments.seperator;
-import org.wargamer2010.signshop.util.signshopUtil;
+import org.wargamer2010.signshop.util.SignShopUtil;
 
 public class Chest implements SignShopOperation {
     private Boolean incorrectPar(SignShopArguments ssArgs) {
@@ -24,7 +24,7 @@ public class Chest implements SignShopOperation {
     private Block checkChestAmount(SignShopArguments ssArgs, Integer iChestnumber) {
         Block bHolder = null;
         int iCount = 0;
-        for(Block bTemp : ssArgs.getContainables().getRoot()) {
+        for(Block bTemp : ssArgs.getContainables().getInner()) {
             if(bTemp.getState() instanceof InventoryHolder) {
                 iCount++;
                 if(iCount == iChestnumber)
@@ -66,14 +66,14 @@ public class Chest implements SignShopOperation {
         ssArgs.getContainables().set(containables);
 
         // In case the next operation doesn't write to !items, in other cases it will be overwritten (by f.e. takePlayerItems)
-        ItemStack[] isTotalItems = itemUtil.getAllItemStacksForContainables(ssArgs.getContainables().get());
+        ItemStack[] isTotalItems = ItemUtil.getAllItemStacksForContainables(ssArgs.getContainables().get());
         if(isTotalItems.length > 0) {
-            ssArgs.setMessagePart("!items", itemUtil.itemStackToString(isTotalItems));
-            ssArgs.miscSettings.put("chest" + iChestnumber, signshopUtil.implode(itemUtil.convertItemStacksToString(isTotalItems), seperator));
+            ssArgs.setMessagePart("!items", ItemUtil.itemStackToString(isTotalItems));
+            ssArgs.miscSettings.put("chest" + iChestnumber, SignShopUtil.implode(ItemUtil.convertItemStacksToString(isTotalItems), seperator));
         }
 
-        // Since we'll be requesting the MetaID before the Seller is created, we need to register the items here
-        Seller.storeMeta(itemUtil.getAllItemStacksForContainables(containables));
+        // Since we'll be requesting the MetaID before the Shop is created, we need to register the items here
+        Shop.storeMeta(ItemUtil.getAllItemStacksForContainables(containables));
 
         return true;
     }
@@ -106,7 +106,7 @@ public class Chest implements SignShopOperation {
             sItemss = misc.split(SignShopArguments.seperator);
         ItemStack[] isItemss;
 
-        isItemss = itemUtil.convertStringtoItemStacks(Arrays.asList(sItemss));
+        isItemss = ItemUtil.convertStringtoItemStacks(Arrays.asList(sItemss));
         ssArgs.getItems().set(isItemss);
 
         Block bHolder = checkChestAmount(ssArgs, iChestnumber);

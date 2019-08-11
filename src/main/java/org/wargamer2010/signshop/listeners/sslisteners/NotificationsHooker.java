@@ -12,7 +12,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.wargamer2010.signshop.configuration.SignShopConfig;
 import org.wargamer2010.signshop.events.SSCreatedEvent;
-import org.wargamer2010.signshop.util.signshopUtil;
+import org.wargamer2010.signshop.util.SignShopUtil;
 
 public class NotificationsHooker implements Listener {
 
@@ -23,7 +23,7 @@ public class NotificationsHooker implements Listener {
         Plugin pl = Bukkit.getPluginManager().getPlugin("Notifications");
         if(pl == null)
             return;
-        String op = signshopUtil.getOperation((Sign) event.getSign().getState(), false);
+        String op = SignShopUtil.getOperation((Sign) event.getSign().getState(), false);
 
         event.setMessagePart("!signtype", op);
         event.setMessagePart("!x", Integer.toString(event.getSign().getX()));

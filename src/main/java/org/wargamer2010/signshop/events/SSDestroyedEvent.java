@@ -2,28 +2,29 @@ package org.wargamer2010.signshop.events;
 
 import org.bukkit.block.Block;
 import org.bukkit.event.HandlerList;
-import org.wargamer2010.signshop.Seller;
+import org.wargamer2010.signshop.Shop;
 import org.wargamer2010.signshop.configuration.Storage;
 import org.wargamer2010.signshop.player.SignShopPlayer;
 
 public class SSDestroyedEvent extends SSEvent {
     private static final HandlerList handlers = new HandlerList();
 
-    private SignShopPlayer ssPlayer = null;
-    private Block bBlock = null;
-    private Seller seShop = null;
-    private SSDestroyedEventType reason = SSDestroyedEventType.unknown;
+    private final SignShopPlayer ssPlayer;
+    private final Block bBlock;
+    private final Shop seShop;
+    private final SSDestroyedEventType reason;
 
-    public SSDestroyedEvent(Block pBlock, SignShopPlayer pPlayer, Seller pShop, SSDestroyedEventType pReason) {
-        if(pPlayer == null)
-            ssPlayer = new SignShopPlayer();
-        else
-            ssPlayer = pPlayer;
+    public SSDestroyedEvent(Block pBlock, SignShopPlayer pPlayer, Shop pShop, SSDestroyedEventType pReason) {
+        ssPlayer = pPlayer;
+
         bBlock = pBlock;
-        if(pShop != null)
+        if (pShop != null)
             seShop = pShop;
-        else if(pReason == SSDestroyedEventType.sign)
-            seShop = Storage.get().getSeller(pBlock.getLocation());
+        else if (pReason == SSDestroyedEventType.SIGN)
+            seShop = Storage.get().getShop(pBlock.getLocation());
+        else
+            seShop = null;
+
         reason = pReason;
     }
 
@@ -40,11 +41,15 @@ public class SSDestroyedEvent extends SSEvent {
         return ssPlayer;
     }
 
+    public boolean hasPlayer() {
+        return ssPlayer != null;
+    }
+
     public Block getBlock() {
         return bBlock;
     }
 
-    public Seller getShop() {
+    public Shop getShop() {
         return seShop;
     }
 

@@ -8,9 +8,9 @@ import org.bukkit.inventory.ItemStack;
 import org.wargamer2010.signshop.configuration.SignShopConfig;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.InventoryHolder;
-import org.wargamer2010.signshop.Seller;
+import org.wargamer2010.signshop.Shop;
 import org.wargamer2010.signshop.configuration.Storage;
-import org.wargamer2010.signshop.util.itemUtil;
+import org.wargamer2010.signshop.util.ItemUtil;
 
 public class playJukebox implements SignShopOperation {
     private ItemStack[] getRecords(List<Block> containables) {
@@ -44,7 +44,7 @@ public class playJukebox implements SignShopOperation {
             return false;
         }
         ssArgs.getItems().set(isTotalItems);
-        ssArgs.setMessagePart("!items", itemUtil.itemStackToString(ssArgs.getItems().get()));
+        ssArgs.setMessagePart("!items", ItemUtil.itemStackToString(ssArgs.getItems().get()));
         return true;
     }
 
@@ -68,8 +68,8 @@ public class playJukebox implements SignShopOperation {
     @Override
     public Boolean runOperation(SignShopArguments ssArgs) {
         ItemStack[] isTotalItems = getRecords(ssArgs.getContainables().get());
-        Seller seller = Storage.get().getSeller(ssArgs.getSign().get().getLocation());
-        String sLastrecord = seller.getVolatile("lastrecord");
+        Shop shop = Storage.get().getShop(ssArgs.getSign().get().getLocation());
+        String sLastrecord = shop.getVolatile("lastrecord");
         Boolean doNext = false;
         Integer counter = 0;
         ItemStack firstItem = isTotalItems[0];
@@ -94,7 +94,7 @@ public class playJukebox implements SignShopOperation {
             playEffect(ssArgs, firstItem.getType());
             sLastrecord = firstItem.getType().toString();
         }
-        seller.setVolatile("lastrecord", sLastrecord);
+        shop.setVolatile("lastrecord", sLastrecord);
         return true;
     }
 }

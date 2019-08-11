@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HookManager {
-    private static HashMap<Hook, Plugin> hooks = new HashMap<Hook, Plugin>();
+    private static HashMap<Hook, Plugin> hooks = new HashMap<>();
 
     private HookManager() {
 
@@ -16,9 +16,9 @@ public class HookManager {
 
     public static Boolean addHook(String sName) {
         Plugin pHook = Bukkit.getServer().getPluginManager().getPlugin(sName);
-        if(pHook != null) {
+        if (pHook != null) {
             Hook hook = createHook(sName);
-            if(hook != null)
+            if (hook != null)
                 hooks.put(hook, pHook);
             return true;
         } else
@@ -29,7 +29,7 @@ public class HookManager {
         String hookClassname = (hookName + "Hook");
         try {
             Class<?> fc = Class.forName("org.wargamer2010.signshop.hooks."+hookClassname);
-            return ((Hook)fc.newInstance());
+            return (Hook) fc.newInstance();
         } catch(ClassNotFoundException notfoundex) { }
         catch(InstantiationException instex) { }
         catch(IllegalAccessException illex) { }
@@ -38,25 +38,20 @@ public class HookManager {
     }
 
     public static Plugin getHook(String sName) {
-        for(Map.Entry<Hook, Plugin> entry : hooks.entrySet()) {
-            if(entry.getKey().getName().equals(sName))
-                return entry.getValue();
-        }
-
-        return null;
+        return hooks.get(sName);
     }
 
     public static Boolean canBuild(Player player, Block block) {
-        for(Hook hookEntry : hooks.keySet()) {
-            if(!hookEntry.canBuild(player, block))
+        for (Hook hookEntry : hooks.keySet()) {
+            if (!hookEntry.canBuild(player, block))
                 return false;
         }
         return true;
     }
 
     public static boolean protectBlock(Player player, Block block) {
-        for(Hook hookEntry : hooks.keySet()) {
-            if(hookEntry.protectBlock(player, block))
+        for (Hook hookEntry : hooks.keySet()) {
+            if (hookEntry.protectBlock(player, block))
                 return true;
         }
 

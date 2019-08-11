@@ -6,9 +6,9 @@ import org.bukkit.material.MaterialData;
 import org.bukkit.material.Lever;
 import org.bukkit.block.Block;
 import org.bukkit.Bukkit;
-import org.wargamer2010.signshop.util.signshopUtil;
+import org.wargamer2010.signshop.util.SignShopUtil;
 import org.wargamer2010.signshop.configuration.SignShopConfig;
-import org.wargamer2010.signshop.util.lagSetter;
+import org.wargamer2010.signshop.util.LagSetter;
 import org.wargamer2010.signshop.SignShop;
 
 public class setRedStoneOnTemp implements SignShopOperation {
@@ -76,8 +76,8 @@ public class setRedStoneOnTemp implements SignShopOperation {
                     lever.setPowered(true);
                     state.setData(lever);
                     state.update();
-                    signshopUtil.generateInteractEvent(bLever, ssArgs.getPlayer().get().getPlayer(), ssArgs.getBlockFace().get());
-                    Bukkit.getServer().getScheduler().runTaskLater(SignShop.getInstance(),new lagSetter(bLever),10*delay);
+                    SignShopUtil.generateInteractEvent(bLever, ssArgs.getPlayer().get().getPlayer(), ssArgs.getBlockFace().get());
+                    Bukkit.getServer().getScheduler().runTaskLater(SignShop.getInstance(),new LagSetter(bLever),10*delay);
                 }
             }
         }

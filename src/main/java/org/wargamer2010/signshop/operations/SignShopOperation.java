@@ -1,5 +1,6 @@
 package org.wargamer2010.signshop.operations;
 
+//TODO use primitive booleans
 public interface SignShopOperation {
     public Boolean setupOperation(SignShopArguments ssArgs);
     

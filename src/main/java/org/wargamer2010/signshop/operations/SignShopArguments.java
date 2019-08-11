@@ -13,80 +13,77 @@ import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.inventory.ItemStack;
-import org.wargamer2010.signshop.Seller;
+import org.wargamer2010.signshop.Shop;
 import org.wargamer2010.signshop.Vault;
 import org.wargamer2010.signshop.configuration.SignShopConfig;
 import org.wargamer2010.signshop.events.IMessagePartContainer;
 import org.wargamer2010.signshop.events.SSMoneyEventType;
 import org.wargamer2010.signshop.player.SignShopPlayer;
-import org.wargamer2010.signshop.util.economyUtil;
-import org.wargamer2010.signshop.util.itemUtil;
-import org.wargamer2010.signshop.util.signshopUtil;
+import org.wargamer2010.signshop.util.EconomyUtil;
+import org.wargamer2010.signshop.util.ItemUtil;
+import org.wargamer2010.signshop.util.SignShopUtil;
 
 public class SignShopArguments implements IMessagePartContainer {
     public SignShopArguments(double pfPrice, ItemStack[] pisItems, List<Block> pContainables, List<Block> pActivatables,
                                 SignShopPlayer pssPlayer, SignShopPlayer pssOwner, Block pbSign, String psOperation, BlockFace pbfBlockFace, Action ac, SignShopArgumentsType type) {
-        fPrice.setRoot(pfPrice);
-        isItems.setRoot(pisItems);
-        containables.setRoot(pContainables);
-        activatables.setRoot(pActivatables);
+        fPrice.setInner(pfPrice);
+        isItems.setInner(pisItems);
+        containables.setInner(pContainables);
+        activatables.setInner(pActivatables);
+
         if(pssPlayer != null)
-            ssPlayer.setRoot(pssPlayer);
-        else
-            ssPlayer.setRoot(new SignShopPlayer((Player)null));
+            ssPlayer.setInner(pssPlayer);
+
         if(pssOwner != null)
-            ssOwner.setRoot(pssOwner);
-        else
-            ssOwner.setRoot(new SignShopPlayer((Player)null));
-        bSign.setRoot(pbSign);
-        sOperation.setRoot(psOperation);
-        bfBlockFace.setRoot(pbfBlockFace);
-        aAction.setRoot(ac);
+            ssOwner.setInner(pssOwner);
+
+        bSign.setInner(pbSign);
+        sOperation.setInner(psOperation);
+        bfBlockFace.setInner(pbfBlockFace);
+        aAction.setInner(ac);
         argumentType = type;
         setDefaultMessageParts();
         fixBooks();
     }
 
-    public SignShopArguments(Seller seller, SignShopPlayer player, SignShopArgumentsType type) {
-        if(seller.getSign().getState() instanceof Sign)
-            fPrice.setRoot(economyUtil.parsePrice(((Sign)seller.getSign().getState()).getLine(3)));
+    public SignShopArguments(Shop shop, SignShopPlayer player, SignShopArgumentsType type) {
+        if(shop.getSign().getState() instanceof Sign)
+            fPrice.setInner(EconomyUtil.parsePrice(((Sign) shop.getSign().getState()).getLine(3)));
 
-        isItems.setRoot(seller.getItems());
-        containables.setRoot(seller.getContainables());
-        activatables.setRoot(seller.getActivatables());
+        isItems.setInner(shop.getItems());
+        containables.setInner(shop.getContainables());
+        activatables.setInner(shop.getActivatables());
         if(player != null)
-            ssPlayer.setRoot(player);
-        else
-            ssPlayer.setRoot(new SignShopPlayer((Player)null));
+            ssPlayer.setInner(player);
 
-        ssOwner.setRoot(seller.getOwner());
-        bSign.setRoot(seller.getSign());
-        sOperation.setRoot(seller.getOperation());
-        bfBlockFace.setRoot(BlockFace.SELF);
+        ssOwner.setInner(shop.getOwner());
+        bSign.setInner(shop.getSign());
+        sOperation.setInner(shop.getOperation());
+        bfBlockFace.setInner(BlockFace.SELF);
         argumentType = type;
         setDefaultMessageParts();
         fixBooks();
     }
 
     private void fixBooks() {
-        if(isItems.getRoot() != null) {
-            itemUtil.fixBooks(isItems.getRoot());
+        if(isItems.getInner() != null) {
+            ItemUtil.fixBooks(isItems.getInner());
         }
 
-        if(containables.getRoot() != null) {
-            itemUtil.fixBooks(itemUtil.getAllItemStacksForContainables(containables.getRoot()));
+        if(containables.getInner() != null) {
+            ItemUtil.fixBooks(ItemUtil.getAllItemStacksForContainables(containables.getInner()));
         }
 
-        SignShopPlayer root = ssPlayer.getRoot();
+        SignShopPlayer root = ssPlayer.getInner();
         if(root != null && root.getPlayer() != null) {
             if(root.getItemInHand() != null) {
                 ItemStack[] stacks = new ItemStack[1];
                 stacks[0] = root.getItemInHand();
-                itemUtil.fixBooks(stacks);
+                ItemUtil.fixBooks(stacks);
             }
 
             ItemStack[] inventory = root.getInventoryContents();
-            itemUtil.fixBooks(inventory);
+            ItemUtil.fixBooks(inventory);
             root.setInventoryContents(inventory);
         }
     }
@@ -95,18 +92,19 @@ public class SignShopArguments implements IMessagePartContainer {
         if(ssPlayer.get() != null) {
             setMessagePart("!customer", ssPlayer.get().getName());
             setMessagePart("!player", ssPlayer.get().getName());
-            if(ssPlayer.get().getPlayer() != null && ssPlayer.get().getPlayer().getWorld() != null)
+            if(ssPlayer.get().getPlayer() != null)
                 setMessagePart("!world", ssPlayer.get().getPlayer().getWorld().getName());
 
             if(Vault.getPermission() != null && ssPlayer.get() != null && ssPlayer.get().getWorld() != null) {
                 World world = ssPlayer.get().getWorld();
                 String name = ssPlayer.get().getName();
+                //TODO why do we need this......
                 setMessagePart("!permgroup", Vault.getPermission().getPrimaryGroup(world, name));
             }
         }
 
         if(fPrice.get() != null)
-            setMessagePart("!price", economyUtil.formatMoney(fPrice.get()));
+            setMessagePart("!price", EconomyUtil.formatMoney(fPrice.get()));
 
         if(ssOwner.get() != null)
             setMessagePart("!owner", ssOwner.get().getName());
@@ -124,7 +122,7 @@ public class SignShopArguments implements IMessagePartContainer {
         }
 
         if(isItems.get() != null && isItems.get().length > 0) {
-            setMessagePart("!items", itemUtil.itemStackToString(isItems.get()));
+            setMessagePart("!items", ItemUtil.itemStackToString(isItems.get()));
         }
     }
 
@@ -147,7 +145,7 @@ public class SignShopArguments implements IMessagePartContainer {
 
     public static String seperator = "~";
 
-    private SignShopArgument<Double> fPrice = new SignShopArgument<Double>(this);
+    private SignShopArgument<Double> fPrice = new SignShopArgument<>(this);
     public SignShopArgument<Double> getPrice() {
         return fPrice;
     }
@@ -155,9 +153,9 @@ public class SignShopArguments implements IMessagePartContainer {
     private SignShopArgument<ItemStack[]> isItems = new SignShopArgument<ItemStack[]>(this) {
         @Override
         public void set(ItemStack[] pItems) {
-            if(getCollection().forceMessageKeys.containsKey("!items") && argumentType == SignShopArgumentsType.Setup)
+            if (getCollection().forceMessageKeys.containsKey("!items") && argumentType == SignShopArgumentsType.Setup)
                 getCollection().miscSettings.put(getCollection().forceMessageKeys.get("!items").replace("!", ""),
-                        signshopUtil.implode(itemUtil.convertItemStacksToString(pItems), seperator));
+                        SignShopUtil.implode(ItemUtil.convertItemStacksToString(pItems), seperator));
             super.set(pItems);
         }
     };
@@ -179,10 +177,16 @@ public class SignShopArguments implements IMessagePartContainer {
     public SignShopArgument<SignShopPlayer> getPlayer() {
         return ssPlayer;
     }
+    public boolean hasPlayer() {
+        return ssPlayer != null && !ssPlayer.isEmpty();
+    }
 
     private SignShopArgument<SignShopPlayer> ssOwner = new SignShopArgument<SignShopPlayer>(this);
     public SignShopArgument<SignShopPlayer> getOwner() {
         return ssOwner;
+    }
+    public boolean hasOwner() {
+        return ssOwner != null && !ssOwner.isEmpty();
     }
 
     private SignShopArgument<Block> bSign = new SignShopArgument<Block>(this);
@@ -195,22 +199,22 @@ public class SignShopArguments implements IMessagePartContainer {
         return sOperation;
     }
 
-    private SignShopArgument<String> sEnchantments = new SignShopArgument<String>(this);
+    private SignShopArgument<String> sEnchantments = new SignShopArgument<>(this);
     public SignShopArgument<String> getEnchantments() {
         return sEnchantments;
     }
 
-    private SignShopArgument<BlockFace> bfBlockFace = new SignShopArgument<BlockFace>(this);
+    private SignShopArgument<BlockFace> bfBlockFace = new SignShopArgument<>(this);
     public SignShopArgument<BlockFace> getBlockFace() {
         return bfBlockFace;
     }
 
-    private SignShopArgument<Action> aAction = new SignShopArgument<Action>(this);
+    private SignShopArgument<Action> aAction = new SignShopArgument<>(this);
     public SignShopArgument<Action> getAction() {
         return aAction;
     }
 
-    private List<String> operationParameters = new LinkedList<String>();
+    private List<String> operationParameters = new LinkedList<>();
     public void setOperationParameters(List<String> pOperationParameters) { operationParameters.clear(); operationParameters.addAll(pOperationParameters); }
     public boolean isOperationParameter(String sOperationParameter) { return operationParameters.contains(sOperationParameter); }
     public boolean hasOperationParameters() { return !operationParameters.isEmpty(); }
@@ -220,8 +224,8 @@ public class SignShopArguments implements IMessagePartContainer {
     public SignShopArgumentsType getArgumentType() { return argumentType; }
     public void setArgumentType(SignShopArgumentsType argumentType) { this.argumentType = argumentType; }
 
-    public Map<String, String> miscSettings = new HashMap<String, String>();
-    public Map<String, String> forceMessageKeys = new HashMap<String, String>();
+    public Map<String, String> miscSettings = new HashMap<>();
+    public Map<String, String> forceMessageKeys = new HashMap<>();
     public boolean bDoNotClearClickmap = false;
     public boolean bPriceModApplied = false;
     public boolean bRunCommandAsUser = false;
@@ -235,7 +239,7 @@ public class SignShopArguments implements IMessagePartContainer {
     }
 
     public void ignoreEmptyChest() {
-        if(!isOperationParameter("allowemptychest"))
+        if (!isOperationParameter("allowemptychest"))
             operationParameters.add("allowemptychest");
     }
 
@@ -244,25 +248,27 @@ public class SignShopArguments implements IMessagePartContainer {
     }
 
     public void sendFailedRequirementsMessage(String messageName) {
-        if(!isLeftClicking())
-            getPlayer().get().sendMessage(SignShopConfig.getError(messageName, getMessageParts()));
+        if (hasPlayer()) {
+            if (!isLeftClicking())
+                getPlayer().get().sendMessage(SignShopConfig.getError(messageName, getMessageParts()));
+        }
     }
 
     public boolean isPlayerOnline() {
-        return (ssPlayer.get() != null && ssPlayer.get().getPlayer() != null && ssPlayer.get().GetIdentifier() != null);
+        return ssPlayer.get() != null && ssPlayer.get().getPlayer() != null && ssPlayer.get().getIdentifier() != null;
     }
 
     public boolean tryToApplyPriceMod() {
-        if(bPriceModApplied)
+        if (bPriceModApplied)
             return false;
         return (bPriceModApplied = true);
     }
 
-    private Map<String, String> messageParts = new LinkedHashMap<String, String>();
+    private Map<String, String> messageParts = new LinkedHashMap<>();
 
     public void setMessagePart(String name, String value) {
         messageParts.put(name, value);
-        if(forceMessageKeys.containsKey(name))
+        if (forceMessageKeys.containsKey(name))
             name = forceMessageKeys.get(name);
         messageParts.put(name, value);
     }
@@ -272,7 +278,7 @@ public class SignShopArguments implements IMessagePartContainer {
     }
 
     public String getMessagePart(String name) {
-        if(hasMessagePart(name))
+        if (hasMessagePart(name))
             return messageParts.get(name);
         return "";
     }

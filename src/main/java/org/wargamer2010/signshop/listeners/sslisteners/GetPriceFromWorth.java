@@ -12,8 +12,8 @@ import org.wargamer2010.signshop.events.SSMoneyRequestType;
 import org.wargamer2010.signshop.events.SSMoneyTransactionEvent;
 import org.wargamer2010.signshop.listeners.SignShopWorthListener;
 import org.wargamer2010.signshop.player.SignShopPlayer;
-import org.wargamer2010.signshop.util.economyUtil;
-import org.wargamer2010.signshop.util.itemUtil;
+import org.wargamer2010.signshop.util.EconomyUtil;
+import org.wargamer2010.signshop.util.ItemUtil;
 
 public class GetPriceFromWorth implements Listener {
 
@@ -31,7 +31,7 @@ public class GetPriceFromWorth implements Listener {
     }
 
     private boolean signHasPlaceholder(Block bSign) {
-        if(!itemUtil.clickedSign(bSign))
+        if(!ItemUtil.isSign(bSign))
             return false;
         Sign sign = (Sign)bSign.getState();
         if(sign.getLine(3) != null && sign.getLine(3).equalsIgnoreCase("[worth]"))
@@ -59,7 +59,7 @@ public class GetPriceFromWorth implements Listener {
             event.setPrice(newPrice);
             if(event.getArguments() != null)
                 event.getArguments().resetPriceMod();
-            event.setMessagePart("!price", economyUtil.formatMoney(newPrice));
+            event.setMessagePart("!price", EconomyUtil.formatMoney(newPrice));
         }
     }
 }

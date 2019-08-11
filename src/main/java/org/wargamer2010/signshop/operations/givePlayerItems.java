@@ -1,10 +1,9 @@
 package org.wargamer2010.signshop.operations;
 
 import org.bukkit.inventory.ItemStack;
-import org.wargamer2010.signshop.util.itemUtil;
+import org.wargamer2010.signshop.util.ItemUtil;
 import org.wargamer2010.signshop.configuration.SignShopConfig;
 import org.bukkit.Material;
-import org.wargamer2010.signshop.player.VirtualInventory;
 
 public class givePlayerItems implements SignShopOperation {
     @Override
@@ -15,7 +14,7 @@ public class givePlayerItems implements SignShopOperation {
             ssArgs.getPlayer().get().sendMessage(SignShopConfig.getError("chest_missing", ssArgs.getMessageParts()));
             return false;
         }
-        ItemStack[] isTotalItems = itemUtil.getAllItemStacksForContainables(ssArgs.getContainables().get());
+        ItemStack[] isTotalItems = ItemUtil.getAllItemStacksForContainables(ssArgs.getContainables().get());
 
         if(!ssArgs.isOperationParameter("allowemptychest") && isTotalItems.length == 0) {
             ssArgs.getPlayer().get().sendMessage(SignShopConfig.getError("chest_empty", ssArgs.getMessageParts()));
@@ -23,7 +22,7 @@ public class givePlayerItems implements SignShopOperation {
         }
         if(isTotalItems.length > 0)
             ssArgs.getItems().set(isTotalItems);
-        ssArgs.setMessagePart("!items", itemUtil.itemStackToString(ssArgs.getItems().get()));
+        ssArgs.setMessagePart("!items", ItemUtil.itemStackToString(ssArgs.getItems().get()));
         return true;
     }
 
@@ -36,7 +35,7 @@ public class givePlayerItems implements SignShopOperation {
             return false;
         }
 
-        ssArgs.setMessagePart("!items", itemUtil.itemStackToString(ssArgs.getItems().get()));
+        ssArgs.setMessagePart("!items", ItemUtil.itemStackToString(ssArgs.getItems().get()));
         if(ssArgs.isOperationParameter("oneslot")) {
             Boolean bEmptySlot = false;
             for(ItemStack stack : ssArgs.getPlayer().get().getPlayer().getInventory().getContents()) {

@@ -2,7 +2,7 @@
 package org.wargamer2010.signshop.commands;
 
 import org.wargamer2010.signshop.player.SignShopPlayer;
-import org.wargamer2010.signshop.util.commandUtil;
+import org.wargamer2010.signshop.util.CommandUtil;
 
 public class TutorialHandler implements ICommandHandler {
     private static ICommandHandler instance = new TutorialHandler();
@@ -34,7 +34,7 @@ public class TutorialHandler implements ICommandHandler {
             }
         }
 
-        commandUtil.sendToPlayerOrConsole(messageBuilder.toString(), player);
+        CommandUtil.sendToPlayerOrConsole(messageBuilder.toString(), player);
         return true;
     }
 

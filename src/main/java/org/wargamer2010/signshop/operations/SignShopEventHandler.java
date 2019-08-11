@@ -6,7 +6,7 @@ import java.util.logging.Level;
 import org.wargamer2010.signshop.SignShop;
 import org.wargamer2010.signshop.configuration.SignShopConfig;
 import org.wargamer2010.signshop.events.SSEvent;
-import org.wargamer2010.signshop.util.signshopUtil;
+import org.wargamer2010.signshop.util.SignShopUtil;
 
 public abstract class SignShopEventHandler implements SignShopOperation {
     @Override
@@ -23,7 +23,7 @@ public abstract class SignShopEventHandler implements SignShopOperation {
             return false;
         }
 
-        List<SignShopOperationListItem> opitems = signshopUtil.getSignShopOps(stringops);
+        List<SignShopOperationListItem> opitems = SignShopUtil.getSignShopOps(stringops);
         for(SignShopOperationListItem item : opitems) {
             if(item.getOperation() instanceof SignShopEventHandler) {
                 ssArgs.setOperationParameters(item.getParameters());

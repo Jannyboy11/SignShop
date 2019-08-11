@@ -10,18 +10,20 @@ import org.wargamer2010.signshop.Vault;
 import org.wargamer2010.signshop.player.SignShopPlayer;
 
 public class SignShopLoginListener implements Listener {
+
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onPluginEnabled(PlayerJoinEvent event) {
-        if(event.getPlayer() == null)
-            return;
+    public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        if(!Vault.isVaultFound() && SignShopPlayer.isOp(player)) {
+
+        if (!Vault.isVaultFound() && SignShopPlayer.isOp(player)) {
             player.sendMessage(SignShop.getLogPrefix()
                 + " Vault not found so plugin can not run. Please install Vault!");
         }
-        if(SignShopServerListener.isEssentialsConflictFound() && SignShopPlayer.isOp(player)) {
+
+        if (SignShopServerListener.isEssentialsConflictFound() && SignShopPlayer.isOp(player)) {
             player.sendMessage(SignShop.getLogPrefix()
                 + " Essentials Signs are enabled that conflict with SignShop. Please check the log for more info!");
         }
     }
+
 }

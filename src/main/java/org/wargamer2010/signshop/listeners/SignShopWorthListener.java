@@ -30,9 +30,9 @@ public class SignShopWorthListener implements Listener {
 
     public final void itEnabled() {
         plEssentials = Bukkit.getServer().getPluginManager().getPlugin(essName);
-        if(plEssentials == null)
+        if (plEssentials == null)
             return;
-        if(wWorth != null)
+        if (wWorth != null)
             wWorth.reloadConfig();
         else
             loadWorth();
@@ -47,10 +47,10 @@ public class SignShopWorthListener implements Listener {
     }
 
     private void loadWorth() {
-        if(plEssentials == null)
+        if (plEssentials == null)
             return;
         File worthfile = new File(plEssentials.getDataFolder(), "worth.yml");
-        if(!worthfile.exists()) {
+        if (!worthfile.exists()) {
             SignShop.log("Essentials was found but no worth.yml was found in it's plugin folder.", Level.WARNING);
             return;
         }

@@ -10,7 +10,7 @@ import org.bukkit.Server;
 
 public class SignShopServerListener implements Listener {
     private Server server;
-    private static final String pluginName = "Essentials";
+    private static final String ESSENTIALS_PLUGIN_NAME = "Essentials";
 
     public SignShopServerListener(Server pServer) {
         server = pServer;
@@ -18,20 +18,20 @@ public class SignShopServerListener implements Listener {
     }
 
     public static boolean isEssentialsConflictFound() {
-        if(Bukkit.getServer().getPluginManager().getPlugin(pluginName) != null)
+        if (Bukkit.getPluginManager().getPlugin(ESSENTIALS_PLUGIN_NAME) != null)
             return EssentialsHelper.isEssentialsConflictFound();
         return false;
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPluginEnabled(PluginEnableEvent event) {
-        if(event.getPlugin().getName().equals(pluginName))
+        if (event.getPlugin().getName().equals(ESSENTIALS_PLUGIN_NAME))
             setupPluginToHookInto();
     }
 
     final public void setupPluginToHookInto() {
-        Plugin plugin = this.server.getPluginManager().getPlugin(pluginName);
-        if (plugin != null)
-            EssentialsHelper.essentialsCheck(plugin);
+        Plugin essentialsPlugin = this.server.getPluginManager().getPlugin(ESSENTIALS_PLUGIN_NAME);
+        if (essentialsPlugin != null)
+            EssentialsHelper.essentialsCheck(essentialsPlugin);
     }
 }

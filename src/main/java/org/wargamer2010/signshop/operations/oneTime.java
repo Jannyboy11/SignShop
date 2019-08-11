@@ -2,19 +2,19 @@ package org.wargamer2010.signshop.operations;
 
 import java.util.Date;
 import org.wargamer2010.signshop.player.SignShopPlayer;
-import org.wargamer2010.signshop.util.signshopUtil;
+import org.wargamer2010.signshop.util.SignShopUtil;
 
 public class oneTime implements SignShopOperation {
 
     @Override
     public Boolean setupOperation(SignShopArguments ssArgs) {
-        signshopUtil.getParam(ssArgs);
+        SignShopUtil.getParam(ssArgs);
         return true;
     }
 
     @Override
     public Boolean checkRequirements(SignShopArguments ssArgs, Boolean activeCheck) {
-        String param = signshopUtil.getParam(ssArgs);
+        String param = SignShopUtil.getParam(ssArgs);
         SignShopPlayer ssPlayer = ssArgs.getPlayer().get();
         if(!ssArgs.isPlayerOnline())
             return true;
@@ -27,7 +27,7 @@ public class oneTime implements SignShopOperation {
 
     @Override
     public Boolean runOperation(SignShopArguments ssArgs) {
-        String param = signshopUtil.getParam(ssArgs);
+        String param = SignShopUtil.getParam(ssArgs);
         SignShopPlayer ssPlayer = ssArgs.getPlayer().get();
 
         boolean ok = ssPlayer.setMeta(param, Long.toString(new Date().getTime()));

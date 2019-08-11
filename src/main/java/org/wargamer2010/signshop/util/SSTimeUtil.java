@@ -13,59 +13,61 @@ public class SSTimeUtil {
      * @return String representation of the time param
      */
     public static String parseTime(int time) {
-        String timeString = "";
-        timeUnit[] timeUnits = { (new timeUnit(60, "Second", time)), (new timeUnit(60, "Minute")), (new timeUnit(24, "Hour")), (new timeUnit(365, "Day")) };
-        for(int i = 0; (i+1) < timeUnits.length; i++)
-            while(timeUnits[i].decrement())
-                timeUnits[i+1].increment();
-        int temp;
-        Boolean first = true;
-        for(int i = (timeUnits.length-1); i >= 0; i--) {
-            temp = timeUnits[i].getAmount();
-            if(temp > 0) {
-                if(!first && i >= 0)
-                    timeString += ", ";
-                else
-                    first = false;
-                timeString += (temp + " " + timeUnits[i].getName());
-                if(temp > 1)
-                    timeString += "s";
+        StringBuilder timeString = new StringBuilder();
+        TimeUnit[] timeUnits =
+                { new TimeUnit(60, "Second", time)
+                , new TimeUnit(60, "Minute")
+                , new TimeUnit(24, "Hour")
+                , new TimeUnit(365, "Day")
+                };
+
+        for (int i = 0; i+1 < timeUnits.length; i++) {
+            while (timeUnits[i].decrement()) {
+                timeUnits[i + 1].increment();
             }
         }
-        int pos = timeString.lastIndexOf(',');
+
+        int temp;
+        boolean first = true;
+        for (int i = timeUnits.length - 1; i >= 0; i--) {
+            temp = timeUnits[i].getAmount();
+            if (temp > 0) {
+                if (!first)
+                    timeString.append(", ");
+                else
+                    first = false;
+
+                timeString.append(temp).append(" ").append(timeUnits[i].getName());
+                if (temp > 1)
+                    timeString.append("s");
+            }
+        }
+        int pos = timeString.toString().lastIndexOf(',');
         if (pos >= 0)
-            timeString = timeString.substring(0,pos) + " and" + timeString.substring(pos+1);
-        return timeString;
+            timeString = new StringBuilder(timeString.substring(0, pos) + " and" + timeString.substring(pos + 1));
+
+        return timeString.toString();
     }
 
-    private static class timeUnit {
+    private static class TimeUnit {
         int maxAmount;
         int currentAmount = 0;
         String name;
 
-        timeUnit(int pMaxAmount, String pName) {
+        TimeUnit(int pMaxAmount, String pName) {
             maxAmount = pMaxAmount;
             name = pName;
         }
 
-        timeUnit(int pMaxAmount, String pName, int pCurrentAmount) {
+        TimeUnit(int pMaxAmount, String pName, int pCurrentAmount) {
             maxAmount = pMaxAmount;
             name = pName;
             currentAmount = pCurrentAmount;
         }
 
-        Boolean decrement() {
-            if(currentAmount >= maxAmount) {
+        boolean decrement() {
+            if (currentAmount >= maxAmount) {
                 currentAmount -= maxAmount;
-                return true;
-            }
-
-            return false;
-        }
-
-        Boolean singleDecrement() {
-            if(currentAmount > 0) {
-                currentAmount--;
                 return true;
             }
 
@@ -76,10 +78,6 @@ public class SSTimeUtil {
             currentAmount++;
         }
 
-        void fullIncrement() {
-            currentAmount += maxAmount;
-        }
-
         String getName() {
             return name;
         }
@@ -88,8 +86,5 @@ public class SSTimeUtil {
             return currentAmount;
         }
 
-        void setAmount(int amount) {
-            currentAmount = amount;
-        }
     }
 }

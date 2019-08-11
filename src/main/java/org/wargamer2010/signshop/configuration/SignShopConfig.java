@@ -24,7 +24,7 @@ import java.util.Comparator;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import org.bukkit.Bukkit;
-import org.wargamer2010.signshop.util.signshopUtil;
+import org.wargamer2010.signshop.util.SignShopUtil;
 import org.wargamer2010.signshop.hooks.HookManager;
 import org.wargamer2010.signshop.SignShop;
 import org.wargamer2010.signshop.operations.SignShopOperation;
@@ -46,7 +46,7 @@ public class SignShopConfig {
     private static Map<String,List<String>> DelayedCommands;
     private static Map<String,Integer> ShopLimits;
     private static List<LinkableMaterial> LinkableMaterials;
-    private static final List<SignShopSpecialOp> SpecialsOps = new LinkedList<SignShopSpecialOp>();
+    private static final List<SignShopSpecialOp> SpecialsOps = new LinkedList<>();
 
     private static SignShop instance = null;
 
@@ -81,9 +81,9 @@ public class SignShopConfig {
     private static String Languages = "english";
     private static final String baseLanguage = "english";
     private static String preferedLanguage = "";
-    private static Material linkMaterial = Material.getMaterial("REDSTONE");
-    private static Material updateMaterial = Material.getMaterial("INK_SACK");
-    private static Material destroyMaterial = Material.getMaterial("IRON_HOE");
+    private static Material linkMaterial = Material.REDSTONE;
+    private static Material updateMaterial = Material.INK_SAC;
+    private static Material destroyMaterial = Material.GOLDEN_AXE;
 
     private SignShopConfig() {
 
@@ -104,8 +104,9 @@ public class SignShopConfig {
         List<String> aLanguages = getOrderedListFromArray(LanguagesAdjusted.split(","));
         if(!aLanguages.contains("config"))
             aLanguages.add("config");
-        Messages = new LinkedHashMap<String,Map<String,HashMap<String,String>>>();
-        Errors = new LinkedHashMap<String,Map<String,String>>();
+
+        Messages = new LinkedHashMap<>();
+        Errors = new LinkedHashMap<>();
         preferedLanguage = "";
         for(String language : aLanguages) {
             String filename = (language + ".yml");
@@ -114,7 +115,7 @@ public class SignShopConfig {
             File languageFile = new File(instance.getDataFolder(), filename);
             if(languageFile.exists()) {
                 FileConfiguration ymlThing = configUtil.loadYMLFromPluginFolder(filename);
-                if(ymlThing != null && !language.equals("config")) {
+                if(!language.equals("config")) {
                     configUtil.loadYMLFromJar(ymlThing, filename);
                 }
 
@@ -152,13 +153,13 @@ public class SignShopConfig {
     private static void setupHooks() {
         HookManager.addHook("LWC");
         HookManager.addHook("Lockette");
-        HookManager.addHook("WorldGuard");
-        HookManager.addHook("Deadbolt");
+        //HookManager.addHook("WorldGuard");
+        //HookManager.addHook("Deadbolt");
         HookManager.addHook("Residence");
         HookManager.addHook("GriefPrevention");
         HookManager.addHook("PreciousStones");
-        HookManager.addHook("PlotMe");
-        HookManager.addHook("Towny");
+        //HookManager.addHook("PlotMe");
+        //HookManager.addHook("Towny");
         HookManager.addHook("Lorelocks");
     }
 
@@ -176,7 +177,10 @@ public class SignShopConfig {
     private static void safeAddLinkeable(String sName, String sGroup, byte sData) {
         if(sName == null || sGroup == null || sName.isEmpty())
             return;
-        LinkableMaterials.add(new LinkableMaterial(sName, sGroup, sData));
+        Material material = Material.matchMaterial(sName);
+        if (material == null)
+            return;
+        LinkableMaterials.add(new LinkableMaterial(material, sGroup));
     }
 
     private static byte getDataFromString(String dur) {
@@ -188,7 +192,7 @@ public class SignShopConfig {
     }
 
     private static void setupLinkables() {
-        LinkableMaterials = new ArrayList<LinkableMaterial>();
+        LinkableMaterials = new ArrayList<>();
         for(Map.Entry<String, String> entry : configUtil.fetchStringStringHashMap("linkableMaterials", config, false).entrySet()) {
             byte data = -1;
             String material;
@@ -265,9 +269,9 @@ public class SignShopConfig {
         UseBlacklistAsWhitelist = ymlThing.getBoolean("UseBlacklistAsWhitelist", UseBlacklistAsWhitelist);
         EnableWrittenBookFix = ymlThing.getBoolean("EnableWrittenBookFix", EnableWrittenBookFix);
         Languages = ymlThing.getString("Languages", Languages);
-        linkMaterial = getMaterial(ymlThing.getString("LinkMaterial", "REDSTONE"), Material.getMaterial("REDSTONE"));
-        updateMaterial = getMaterial(ymlThing.getString("UpdateMaterial", "INK_SACK"), Material.getMaterial("INK_SACK"));
-        destroyMaterial = getMaterial(ymlThing.getString("DestroyMaterial", "GOLD_AXE"), Material.getMaterial("GOLD_AXE"));
+        linkMaterial = getMaterial(ymlThing.getString("LinkMaterial", "REDSTONE"), Material.REDSTONE);
+        updateMaterial = getMaterial(ymlThing.getString("UpdateMaterial", "INK_SAC"), Material.INK_SAC);
+        destroyMaterial = getMaterial(ymlThing.getString("DestroyMaterial", "GOLDEN_AXE"), Material.GOLDEN_AXE);
 
         // Sanity check
         if(ChunkLoadRadius > 50 || ChunkLoadRadius < 0)
@@ -276,12 +280,12 @@ public class SignShopConfig {
         config = ymlThing;
     }
 
-    private static Material getMaterial(String mat, Material defaultmat) {
+    private static Material getMaterial(String mat, Material defaultMaterial) {
         String name = mat.toUpperCase();
         Material temp = Material.getMaterial(name);
-        if(temp == null) {
+        if (temp == null) {
             SignShop.log("Material called: " + mat + " does not exist, please check your config.yml!", Level.WARNING);
-            return defaultmat;
+            return defaultMaterial;
         }
         return temp;
     }
@@ -316,7 +320,7 @@ public class SignShopConfig {
             List<String> tempCheckedSignOperation = new LinkedList<String>();
 
             for(String tempOperationString : allSignOperations.get(sKey).split("\\,")) {
-                List<String> bits = signshopUtil.getParameters(tempOperationString.trim());
+                List<String> bits = SignShopUtil.getParameters(tempOperationString.trim());
                 String op = bits.get(0);
                 Object opinstance = getInstance(packageName + "." + op.trim());
                 if(opinstance == null) // Retry with default package
@@ -370,7 +374,7 @@ public class SignShopConfig {
     }
 
     private static String opListToString(List<String> operations) {
-        return signshopUtil.implode(operations.toArray(new String[operations.size()]), ",");
+        return SignShopUtil.implode(operations.toArray(new String[operations.size()]), ",");
     }
 
     private static String fetchCaseCorrectedKey(Map<String, String> map, String lowercased) {
@@ -388,7 +392,7 @@ public class SignShopConfig {
         Boolean changedSomething = false;
         for(Map.Entry<String, List<String>> entry :  Operations.entrySet()) {
             if(SignShopConfig.Commands.containsKey(entry.getKey().toLowerCase())) {
-                List<SignShopOperationListItem> tempList = signshopUtil.getSignShopOps(entry.getValue());
+                List<SignShopOperationListItem> tempList = SignShopUtil.getSignShopOps(entry.getValue());
                 Boolean found = false;
                 for(SignShopOperationListItem tempOp : tempList)
                     if(tempOp.getOperation() instanceof runCommand || tempOp.getParameters().contains("runCommand"))
@@ -491,13 +495,13 @@ public class SignShopConfig {
 
     public static List<String> getBlocks(String pOp) {
         String op = pOp;
-        if(OperationAliases.containsKey(op))
+        if (OperationAliases.containsKey(op))
             op = OperationAliases.get(op);
 
-        if(Operations.containsKey(op))
+        if (Operations.containsKey(op))
             return Operations.get(op);
         else
-            return new LinkedList<String>();
+            return new LinkedList<>();
     }
 
     public static Collection<String> getOperations() {
@@ -581,7 +585,7 @@ public class SignShopConfig {
     public static String fillInBlanks(String pMessage, Map<String, String> messageParts) {
         String message = pMessage;
 
-        if(messageParts == null)
+        if(messageParts == null || messageParts.isEmpty())
             return message;
 
         TreeMap<String, String> temp = new TreeMap<String, String>(new StringLengthComparator());
@@ -773,7 +777,7 @@ public class SignShopConfig {
     }
 
     public static boolean isOPMaterial(Material check) {
-        return (check == updateMaterial || check == linkMaterial);
+        return check == updateMaterial || check == linkMaterial;
     }
 
     /**
@@ -784,7 +788,7 @@ public class SignShopConfig {
         public int compare(String s1, String s2) {
             int s2Length = s2.length();
             int s1Length = s1.length();
-            if(s2Length == s1Length)
+            if (s2Length == s1Length)
                 return -1;
             return s2Length - s1Length;
         }

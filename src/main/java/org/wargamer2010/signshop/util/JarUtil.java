@@ -61,23 +61,22 @@ public class JarUtil {
         }
     }
 
+    /**
+     * @deprecated bundling and shading is preferred
+     * @param url where the class(es) live
+     * @throws IOException if anything goes wrong
+     */
+    @Deprecated
     private static void addClassPath(final URL url) throws IOException {
-        URLClassLoader loader = (URLClassLoader) SignShop.class.getClassLoader();
-        URLClassLoader sysloader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-        URLClassLoader loaderToUse;
-        if(loader != sysloader && loader != null)
-            loaderToUse = loader;
-        else
-            loaderToUse = sysloader;
+        //TODO might throw ClassCastExeption in the future, especially when bukkit gets support for libraries in plugin.yml
+        URLClassLoader pluginClassLoader = (URLClassLoader) SignShop.class.getClassLoader();
 
-        final Class<URLClassLoader> sysclass = URLClassLoader.class;
         try {
-            final Method method = sysclass.getDeclaredMethod("addURL",
-                    new Class<?>[] { URL.class });
+            final Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
             method.setAccessible(true);
-            method.invoke(loaderToUse, new Object[] { url });
+            method.invoke(pluginClassLoader, url);
         } catch (final Throwable t) {
-            throw new IOException("Error adding " + url + " to system classloader");
+            throw new IOException("Error adding " + url + " to plugin classloader", t);
         }
     }
 }

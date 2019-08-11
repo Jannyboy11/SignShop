@@ -19,19 +19,21 @@ public class BookFactory {
     }
 
     public static IBookItem getBookItem(org.bukkit.inventory.ItemStack stack) {
+        //both branches were doing the same.
+        return new BookItem(stack);
 
-        try {
-            // Bukkit API 1.9.4+
-            BookMeta.Generation.class.isEnum();
-            return new BookItem(stack);
-        } catch( NoClassDefFoundError e ) {
-            // Bukkit API 1.8.8-
-            return new BookItem(stack);
-        }
-
+//            try {
+//                // Bukkit API 1.9.4+
+//                BookMeta.Generation.class.isEnum();
+//                return new BookItem(stack);
+//            } catch( NoClassDefFoundError e ) {
+//                // Bukkit API 1.8.8-
+//                return new BookItem(stack);
+//            }
     }
 
     public static IItemTags getItemTags() {
-        return tags == null ? new ItemTags() : tags;
+        //lazy init
+        return tags == null ? tags = new ItemTags() : tags;
     }
 }

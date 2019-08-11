@@ -2,7 +2,7 @@ package org.wargamer2010.signshop.operations;
 
 import org.bukkit.inventory.ItemStack;
 import org.wargamer2010.signshop.configuration.SignShopConfig;
-import org.wargamer2010.signshop.util.signshopUtil;
+import org.wargamer2010.signshop.util.SignShopUtil;
 
 public class repairPlayerHeldItem implements SignShopOperation {
     private void calculatePrice(SignShopArguments ssArgs) {
@@ -10,7 +10,7 @@ public class repairPlayerHeldItem implements SignShopOperation {
         // Subtract the modifier from 1 because we want the repair to cost more when the durability on the item is lower (mod = 1 means the item is mint)
         // The item will never be mint and the price will never be completely 0 since we checked the damage level below
         if(ssArgs.isOperationParameter("variablecost"))
-            ssArgs.getPrice().set(ssArgs.getPrice().get() * (1.0f - signshopUtil.calculateDurabilityModifier(new ItemStack[] { isInHand })));
+            ssArgs.getPrice().set(ssArgs.getPrice().get() * (1.0f - SignShopUtil.calculateDurabilityModifier(new ItemStack[] { isInHand })));
     }
 
     @Override

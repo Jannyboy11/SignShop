@@ -3,10 +3,10 @@ package org.wargamer2010.signshop.util;
 import org.bukkit.ChatColor;
 import org.wargamer2010.signshop.Vault;
 
-public class economyUtil {
+public class EconomyUtil {
     private static ChatColor moneyColor = ChatColor.GREEN;
 
-    private economyUtil() {
+    private EconomyUtil() {
 
     }
 
@@ -22,26 +22,28 @@ public class economyUtil {
     }
 
     public static double parsePrice(String line) {
-        if(line == null)
-            return 0.0d;
-        String priceline = ChatColor.stripColor(line);
+        if (line == null) return 0.0d;
+
+        String priceLine = ChatColor.stripColor(line);
         String sPrice = "";
-        Double fPrice;
-        for(int i = 0; i < priceline.length(); i++)
-            if(Character.isDigit(priceline.charAt(i)) || priceline.charAt(i) == '.')
-                sPrice += priceline.charAt(i);
+        double fPrice;
+        for (int i = 0; i < priceLine.length(); i++)
+            if (Character.isDigit(priceLine.charAt(i)) || priceLine.charAt(i) == '.')
+                sPrice += priceLine.charAt(i);
         try {
             fPrice = Double.parseDouble(sPrice);
-        }
-        catch(NumberFormatException nFE) {
+        } catch (NumberFormatException nfe) {
             fPrice = 0.0d;
         }
-        if(fPrice < 0.0f) {
+        if (fPrice < 0.0f) {
             fPrice = 0.0d;
         }
-        if(fPrice.isNaN() || fPrice.isInfinite())
+
+        Double doubleObject = Double.valueOf(fPrice);
+        if (doubleObject.isNaN() || doubleObject.isInfinite())
             fPrice = 0.0d;
-        return fPrice.doubleValue();
+
+        return fPrice;
     }
 
 }

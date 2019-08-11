@@ -3,12 +3,12 @@ package org.wargamer2010.signshop.operations;
 import java.util.logging.Level;
 import org.wargamer2010.signshop.SignShop;
 import org.wargamer2010.signshop.player.SignShopPlayer;
-import org.wargamer2010.signshop.util.signshopUtil;
+import org.wargamer2010.signshop.util.SignShopUtil;
 
 public class resetOneTime implements SignShopOperation {
     @Override
     public Boolean setupOperation(SignShopArguments ssArgs) {
-        signshopUtil.getParam(ssArgs);
+        SignShopUtil.getParam(ssArgs);
         return true;
     }
 
@@ -22,7 +22,7 @@ public class resetOneTime implements SignShopOperation {
         if(!ssArgs.isPlayerOnline())
             return true;
 
-        String param = signshopUtil.getParam(ssArgs);
+        String param = SignShopUtil.getParam(ssArgs);
         SignShopPlayer ssPlayer = ssArgs.getPlayer().get();
         if(!ssPlayer.hasMeta(param)) {
             ssArgs.sendFailedRequirementsMessage("nothing_to_reset_ontime");
@@ -33,7 +33,7 @@ public class resetOneTime implements SignShopOperation {
 
     @Override
     public Boolean runOperation(SignShopArguments ssArgs) {
-        String param = signshopUtil.getParam(ssArgs);
+        String param = SignShopUtil.getParam(ssArgs);
         SignShopPlayer ssPlayer = ssArgs.getPlayer().get();
         boolean ok = ssPlayer.removeMeta(param);
         if(!ok)

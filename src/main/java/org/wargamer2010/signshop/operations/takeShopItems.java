@@ -4,7 +4,10 @@ import org.bukkit.ChatColor;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.InventoryHolder;
 import org.wargamer2010.signshop.configuration.SignShopConfig;
-import org.wargamer2010.signshop.util.itemUtil;
+import org.wargamer2010.signshop.util.ItemUtil;
+
+import java.util.Arrays;
+import java.util.Objects;
 
 public class takeShopItems implements SignShopOperation {
     @Override
@@ -13,7 +16,7 @@ public class takeShopItems implements SignShopOperation {
             ssArgs.getPlayer().get().sendMessage(SignShopConfig.getError("chest_missing", ssArgs.getMessageParts()));
             return false;
         }
-        ItemStack[] isTotalItems = itemUtil.getAllItemStacksForContainables(ssArgs.getContainables().get());
+        ItemStack[] isTotalItems = ItemUtil.getAllItemStacksForContainables(ssArgs.getContainables().get());
 
         if(!ssArgs.isOperationParameter("allowemptychest") && isTotalItems.length == 0) {
             ssArgs.getPlayer().get().sendMessage(SignShopConfig.getError("chest_empty", ssArgs.getMessageParts()));
@@ -21,7 +24,7 @@ public class takeShopItems implements SignShopOperation {
         }
         if(isTotalItems.length > 0)
             ssArgs.getItems().set(isTotalItems);
-        ssArgs.setMessagePart("!items", itemUtil.itemStackToString(ssArgs.getItems().get()));
+        ssArgs.setMessagePart("!items", ItemUtil.itemStackToString(ssArgs.getItems().get()));
         return true;
     }
 
@@ -32,29 +35,33 @@ public class takeShopItems implements SignShopOperation {
             return false;
         }
 
-        Boolean bStockOK = itemUtil.stockOKForContainables(ssArgs.getContainables().get(), ssArgs.getItems().get(), true);
-        ssArgs.setMessagePart("!items", itemUtil.itemStackToString(ssArgs.getItems().get()));
+        Boolean bStockOK = ItemUtil.stockOKForContainables(ssArgs.getContainables().get(), ssArgs.getItems().get(), true);
+        ssArgs.setMessagePart("!items", ItemUtil.itemStackToString(ssArgs.getItems().get()));
         if(!bStockOK)
             ssArgs.sendFailedRequirementsMessage("out_of_stock");
         if(!bStockOK && activeCheck)
-            itemUtil.updateStockStatus(ssArgs.getSign().get(), ChatColor.DARK_RED);
+            ItemUtil.updateStockStatus(ssArgs.getSign().get(), ChatColor.DARK_RED);
         else if(activeCheck)
-            itemUtil.updateStockStatus(ssArgs.getSign().get(), ChatColor.DARK_BLUE);
+            ItemUtil.updateStockStatus(ssArgs.getSign().get(), ChatColor.DARK_BLUE);
 
         return bStockOK;
     }
 
     @Override
     public Boolean runOperation(SignShopArguments ssArgs) {
-        InventoryHolder Holder = itemUtil.getFirstStockOKForContainables(ssArgs.getContainables().get(), ssArgs.getItems().get(), true);
-        if(Holder == null)
+        InventoryHolder holder = ItemUtil.getFirstStockOKForContainables(ssArgs.getContainables().get(), ssArgs.getItems().get(), true);
+        if(holder == null)
             return false;
-        Holder.getInventory().removeItem(ssArgs.getItems().get());
-        if(!itemUtil.stockOKForContainables(ssArgs.getContainables().get(), ssArgs.getItems().get(), true))
-            itemUtil.updateStockStatus(ssArgs.getSign().get(), ChatColor.DARK_RED);
+        ItemStack[] argumentItems = ssArgs.getItems().get();
+        if (argumentItems != null) {
+            argumentItems = Arrays.stream(argumentItems).filter(Objects::nonNull).toArray(ItemStack[]::new);
+            holder.getInventory().removeItem(argumentItems);
+        }
+        if(!ItemUtil.stockOKForContainables(ssArgs.getContainables().get(), ssArgs.getItems().get(), true))
+            ItemUtil.updateStockStatus(ssArgs.getSign().get(), ChatColor.DARK_RED);
         else
-            itemUtil.updateStockStatus(ssArgs.getSign().get(), ChatColor.DARK_BLUE);
-        ssArgs.setMessagePart("!items", itemUtil.itemStackToString(ssArgs.getItems().get()));
+            ItemUtil.updateStockStatus(ssArgs.getSign().get(), ChatColor.DARK_BLUE);
+        ssArgs.setMessagePart("!items", ItemUtil.itemStackToString(ssArgs.getItems().get()));
         return true;
     }
 }

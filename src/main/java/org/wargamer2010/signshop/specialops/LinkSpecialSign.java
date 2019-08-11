@@ -7,7 +7,7 @@ import org.bukkit.block.Sign;
 import java.util.List;
 import java.util.LinkedList;
 import org.wargamer2010.signshop.configuration.SignShopConfig;
-import org.wargamer2010.signshop.Seller;
+import org.wargamer2010.signshop.Shop;
 import org.wargamer2010.signshop.configuration.Storage;
 import org.wargamer2010.signshop.player.SignShopPlayer;
 import org.wargamer2010.signshop.util.*;
@@ -16,15 +16,15 @@ public class LinkSpecialSign implements SignShopSpecialOp {
     @Override
     public Boolean runOperation(List<Block> clickedBlocks, PlayerInteractEvent event, Boolean ranSomething) {
         Block shopSign = event.getClickedBlock();
-        if(!itemUtil.clickedSign(shopSign))
+        if(!ItemUtil.isSign(shopSign))
             return false;
         Player player = event.getPlayer();
         SignShopPlayer ssPlayer = new SignShopPlayer(player);
-        Seller seller = Storage.get().getSeller(shopSign.getLocation());
-        String sOperation = signshopUtil.getOperation(((Sign)shopSign.getState()).getLine(0));
-        if(seller == null)
+        Shop shop = Storage.get().getShop(shopSign.getLocation());
+        String sOperation = SignShopUtil.getOperation(((Sign)shopSign.getState()).getLine(0));
+        if(shop == null)
             return false;
-        if(ssPlayer.getItemInHand() == null || ssPlayer.getItemInHand().getType() != SignShopConfig.getLinkMaterial() || !itemUtil.clickedSign(shopSign))
+        if(ssPlayer.getItemInHand() == null || ssPlayer.getItemInHand().getType() != SignShopConfig.getLinkMaterial() || !ItemUtil.isSign(shopSign))
             return false;
         if(isSupported(sOperation)) // Can't link a special sign to a special sign
             return false;
@@ -33,10 +33,10 @@ public class LinkSpecialSign implements SignShopSpecialOp {
         // For now, let's support linking/unlinking a single special sign type at a time
         String SignName = null;
         for(Block bTemp : clickedBlocks) {
-            if(itemUtil.clickedSign(bTemp)) {
+            if(ItemUtil.isSign(bTemp)) {
                 Sign sign = (Sign)bTemp.getState();
-                if(isSupported(signshopUtil.getOperation(sign.getLine(0)))) {
-                    SignName = signshopUtil.getOperation(sign.getLine(0));
+                if(isSupported(SignShopUtil.getOperation(sign.getLine(0)))) {
+                    SignName = SignShopUtil.getOperation(sign.getLine(0));
                 }
             }
         }
@@ -50,22 +50,22 @@ public class LinkSpecialSign implements SignShopSpecialOp {
 
         List<Block> newSigns = new LinkedList<Block>();
 
-        List<Block> currentSigns = signshopUtil.getSignsFromMisc(seller, MiscSetting);
+        List<Block> currentSigns = SignShopUtil.getSignsFromMisc(shop, MiscSetting);
         Boolean bUnlinked = false;
         for(Block bTemp : clickedBlocks) {
             if(currentSigns.contains(bTemp)) {
                 ssPlayer.sendMessage(SignShopConfig.getError(UnlinkedMessage, null));
                 bUnlinked = true;
                 currentSigns.remove(bTemp);
-            } else if(itemUtil.clickedSign(bTemp)) {
+            } else if(ItemUtil.isSign(bTemp)) {
                 Sign sign = (Sign)bTemp.getState();
-                if(signshopUtil.getOperation(sign.getLine(0)).equals(SignName))
+                if(SignShopUtil.getOperation(sign.getLine(0)).equals(SignName))
                     newSigns.add(bTemp);
             }
         }
 
         if((bUnlinked && newSigns.isEmpty()) || !newSigns.isEmpty()) {
-            if(!seller.isOwner(ssPlayer) && !ssPlayer.isOp()) {
+            if(!shop.isOwner(ssPlayer) && !ssPlayer.isOp()) {
                 ssPlayer.sendMessage(SignShopConfig.getError(NotAllowedMessage, null));
                 return true;
             }
@@ -75,19 +75,19 @@ public class LinkSpecialSign implements SignShopSpecialOp {
         if(!bUnlinked && newSigns.isEmpty())
             return false;
         else if(newSigns.isEmpty()) {
-            seller.removeMisc(MiscSetting);
-            Storage.get().Save();
+            shop.removeMisc(MiscSetting);
+            Storage.get().save();
             return true;
         }
         newSigns.addAll(currentSigns);
 
         String locations;
         if(SignName.equals("restricted"))
-            locations = signshopUtil.validateRestrictSign(newSigns, ssPlayer);
+            locations = SignShopUtil.validateRestrictSign(newSigns, ssPlayer);
         else if(SignName.equals("share"))
-            locations = signshopUtil.validateShareSign(newSigns, ssPlayer);
+            locations = SignShopUtil.validateShareSign(newSigns, ssPlayer);
         else if(SignName.equals("bank"))
-            locations = signshopUtil.validateBankSign(newSigns, ssPlayer);
+            locations = SignShopUtil.validateBankSign(newSigns, ssPlayer);
         else
             return false;
 
@@ -95,8 +95,8 @@ public class LinkSpecialSign implements SignShopSpecialOp {
             return true;
         else {
             ssPlayer.sendMessage(SignShopConfig.getError(LinkedMessage, null));
-            seller.addMisc(MiscSetting, locations);
-            Storage.get().Save();
+            shop.addMisc(MiscSetting, locations);
+            Storage.get().save();
         }
 
         return true;

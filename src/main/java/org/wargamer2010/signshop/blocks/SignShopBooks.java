@@ -7,8 +7,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import org.bukkit.inventory.ItemStack;
 import org.wargamer2010.signshop.SignShop;
-import org.wargamer2010.signshop.util.itemUtil;
-import org.wargamer2010.signshop.util.signshopUtil;
+import org.wargamer2010.signshop.util.ItemUtil;
+import org.wargamer2010.signshop.util.SignShopUtil;
 
 public class SignShopBooks {
     private static final char pageSeperator = (char)3;
@@ -42,7 +42,7 @@ public class SignShopBooks {
         Map<Integer, Object> pars = new LinkedHashMap<Integer, Object>();
         pars.put(1, (item.getTitle() == null) ? "" : item.getTitle());
         pars.put(2, (item.getAuthor() == null) ? "" : item.getAuthor());
-        pars.put(3, signshopUtil.implode(item.getPages(), String.valueOf(pageSeperator)));
+        pars.put(3, SignShopUtil.implode(item.getPages(), String.valueOf(pageSeperator)));
         Integer gen = item.getGeneration();
         pars.put(4, gen == null ? -1 : gen);
         Integer ID;
@@ -71,7 +71,7 @@ public class SignShopBooks {
     }
 
     public static Integer getBookID(ItemStack bookStack) {
-        if(!itemUtil.isWriteableBook(bookStack))
+        if(!ItemUtil.isWriteableBook(bookStack))
             return -1;
 
         SSDatabase db = new SSDatabase(filename);
@@ -79,7 +79,7 @@ public class SignShopBooks {
         Map<Integer, Object> pars = new LinkedHashMap<Integer, Object>();
         pars.put(1, (item.getTitle() == null) ? "" : item.getTitle());
         pars.put(2, (item.getAuthor() == null) ? "" : item.getAuthor());
-        pars.put(3, signshopUtil.implode(item.getPages(), String.valueOf(pageSeperator)));
+        pars.put(3, SignShopUtil.implode(item.getPages(), String.valueOf(pageSeperator)));
         Integer gen = item.getGeneration();
         pars.put(4, gen == null ? -1 : gen);
         Integer ID = null;

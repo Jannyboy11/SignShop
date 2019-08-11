@@ -1,7 +1,7 @@
 package org.wargamer2010.signshop.operations;
 
 import org.bukkit.inventory.ItemStack;
-import org.wargamer2010.signshop.util.itemUtil;
+import org.wargamer2010.signshop.util.ItemUtil;
 import java.util.Random;
 import org.wargamer2010.signshop.configuration.SignShopConfig;
 
@@ -18,7 +18,7 @@ public class RandomItem implements SignShopOperation {
             return false;
         }
 
-        ssArgs.getItems().set(itemUtil.getMinimumAmount(ssArgs.getItems().get()));
+        ssArgs.getItems().set(ItemUtil.getMinimumAmount(ssArgs.getItems().get()));
         return true;
     }
 
@@ -27,7 +27,7 @@ public class RandomItem implements SignShopOperation {
         ItemStack isRandom = ssArgs.getItems().get()[(new Random()).nextInt(ssArgs.getItems().get().length)];
         ItemStack isRandoms[] = new ItemStack[1]; isRandoms[0] = isRandom;
         ssArgs.getItems().set(isRandoms);
-        ssArgs.setMessagePart("!items", itemUtil.itemStackToString(ssArgs.getItems().get()));
+        ssArgs.setMessagePart("!items", ItemUtil.itemStackToString(ssArgs.getItems().get()));
         return true;
     }
 }

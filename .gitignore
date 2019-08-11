@@ -1,5 +1,5 @@
-/*
-!/.gitignore
-!/src
-!/pom.xml
-!/appveyor.yml
+target/*
+libs/*
+.idea/*
+*.iml
+

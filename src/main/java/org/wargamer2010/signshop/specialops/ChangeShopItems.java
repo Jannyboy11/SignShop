@@ -7,7 +7,7 @@ import org.bukkit.block.Sign;
 import java.util.List;
 import java.util.LinkedList;
 import org.wargamer2010.signshop.configuration.SignShopConfig;
-import org.wargamer2010.signshop.Seller;
+import org.wargamer2010.signshop.Shop;
 import org.wargamer2010.signshop.SignShop;
 import org.wargamer2010.signshop.configuration.Storage;
 import org.wargamer2010.signshop.events.SSCreatedEvent;
@@ -27,36 +27,36 @@ public class ChangeShopItems implements SignShopSpecialOp {
         Player player = event.getPlayer();
         SignShopPlayer ssPlayer = new SignShopPlayer(player);
         Block bClicked = event.getClickedBlock();
-        Seller seller = Storage.get().getSeller(bClicked.getLocation());
-        String sOperation = signshopUtil.getOperation(((Sign) bClicked.getState()).getLine(0));
-        if(seller == null)
+        Shop shop = Storage.get().getShop(bClicked.getLocation());
+        String sOperation = SignShopUtil.getOperation(((Sign) bClicked.getState()).getLine(0));
+        if(shop == null)
             return false;
         if(ssPlayer.getItemInHand() == null || ssPlayer.getItemInHand().getType() != SignShopConfig.getUpdateMaterial())
             return false;
-        SignShopPlayer ssOwner = seller.getOwner();
+        SignShopPlayer ssOwner = shop.getOwner();
         List<String> operation = SignShopConfig.getBlocks(sOperation);
         String[] sLines = ((Sign) bClicked.getState()).getLines();
 
-        if (!seller.isOwner(ssPlayer) && !ssPlayer.isOp()) {
+        if (!shop.isOwner(ssPlayer) && !ssPlayer.isOp()) {
             ssPlayer.sendMessage(SignShopConfig.getError("no_permission", null));
             return true;
         }
 
         List<Block> containables = new LinkedList<Block>();
         List<Block> activatables = new LinkedList<Block>();
-        Boolean wentOK = signshopUtil.getSignshopBlocksFromList(ssPlayer, containables, activatables, event.getClickedBlock());
+        Boolean wentOK = SignShopUtil.getSignshopBlocksFromList(ssPlayer, containables, activatables, event.getClickedBlock());
         if (!wentOK)
             return false;
         if(containables.isEmpty() && activatables.isEmpty())
             return false;
 
-        List<SignShopOperationListItem> SignShopOperations = signshopUtil.getSignShopOps(operation);
+        List<SignShopOperationListItem> SignShopOperations = SignShopUtil.getSignShopOps(operation);
         if (SignShopOperations == null) {
             ssPlayer.sendMessage(SignShopConfig.getError("invalid_operation", null));
             return false;
         }
 
-        SignShopArguments ssArgs = new SignShopArguments(economyUtil.parsePrice(sLines[3]), null, containables, activatables,
+        SignShopArguments ssArgs = new SignShopArguments(EconomyUtil.parsePrice(sLines[3]), null, containables, activatables,
                 ssPlayer, ssOwner, bClicked, sOperation, event.getBlockFace(), event.getAction(), SignShopArgumentsType.Setup);
 
         Boolean bSetupOK = false;
@@ -73,22 +73,22 @@ public class ChangeShopItems implements SignShopSpecialOp {
             return true;
         }
 
-        if(!signshopUtil.getPriceFromMoneyEvent(ssArgs)) {
+        if(!SignShopUtil.getPriceFromMoneyEvent(ssArgs)) {
             ssPlayer.sendMessage(SignShopConfig.getError("failed_to_update_shop", ssArgs.getMessageParts()));
             return true;
         }
 
         SSCreatedEvent createdevent = SSEventFactory.generateCreatedEvent(ssArgs);
-        SignShop.scheduleEvent(createdevent);
+        SignShop.callEvent(createdevent);
         if(createdevent.isCancelled()) {
             ssPlayer.sendMessage(SignShopConfig.getError("failed_to_update_shop", ssArgs.getMessageParts()));
             return true;
         }
 
-        Storage.get().updateSeller(bClicked, seller.getContainables(), seller.getActivatables(), ssArgs.getItems().get());
+        Storage.get().updateShop(bClicked, shop.getContainables(), shop.getActivatables(), ssArgs.getItems().get());
 
         if (!ssArgs.bDoNotClearClickmap) {
-            clicks.removePlayerFromClickmap(player);
+            Clicks.removePlayerFromClickMap(player);
         }
 
         ssPlayer.sendMessage(SignShopConfig.getError("updated_shop", ssArgs.getMessageParts()));

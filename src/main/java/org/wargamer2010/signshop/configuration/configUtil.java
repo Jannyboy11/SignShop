@@ -19,7 +19,7 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.wargamer2010.signshop.SignShop;
-import org.wargamer2010.signshop.util.signshopUtil;
+import org.wargamer2010.signshop.util.SignShopUtil;
 
 public class configUtil {
     private configUtil() {
@@ -268,7 +268,7 @@ public class configUtil {
                 }
             }
 
-            return signshopUtil.implode(lines, "\n");
+            return SignShopUtil.implode(lines, "\n");
         } catch(FileNotFoundException ex) { }
         catch(IOException ex) { }
 

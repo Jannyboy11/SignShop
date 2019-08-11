@@ -38,13 +38,13 @@ public class PlayerMetadata {
 
     public String getMetaValue(String key) {
         SSDatabase metadb = new SSDatabase(filename);
-        Map<Integer, Object> params = new LinkedHashMap<Integer, Object>();
+        Map<Integer, Object> params = new LinkedHashMap<>();
         params.put(1, plugin.getName());
-        params.put(2, ssPlayer.GetIdentifier().toString());
+        params.put(2, ssPlayer.getIdentifier().toString());
         params.put(3, key);
 
         try {
-            ResultSet set = (ResultSet)metadb.runStatement("SELECT Metavalue FROM PlayerMeta WHERE Plugin = ? AND Playername = ? AND Metakey = ?", params, true);
+            ResultSet set = (ResultSet) metadb.runStatement("SELECT Metavalue FROM PlayerMeta WHERE Plugin = ? AND Playername = ? AND Metakey = ?", params, true);
             if(set == null)
                 return null;
             if(set.next())
@@ -66,7 +66,7 @@ public class PlayerMetadata {
         try {
             Map<Integer, Object> params = new LinkedHashMap<Integer, Object>();
             params.put(1, plugin.getName());
-            params.put(2, ssPlayer.GetIdentifier().toString());
+            params.put(2, ssPlayer.getIdentifier().toString());
             params.put(3, key);
             params.put(4, value);
             return (metadb.runStatement("INSERT INTO PlayerMeta(Plugin, Playername, Metakey, Metavalue) VALUES (?, ?, ?, ?)", params, false) != null);
@@ -79,10 +79,10 @@ public class PlayerMetadata {
     public boolean updateMeta(String key, String value) {
         SSDatabase metadb = new SSDatabase(filename);
         try {
-            Map<Integer, Object> params = new LinkedHashMap<Integer, Object>();
+            Map<Integer, Object> params = new LinkedHashMap<>();
             params.put(1, value);
             params.put(2, plugin.getName());
-            params.put(3, ssPlayer.GetIdentifier().toString());
+            params.put(3, ssPlayer.getIdentifier().toString());
             params.put(4, key);
             return (metadb.runStatement("UPDATE PlayerMeta SET Metavalue = ? WHERE Plugin = ? AND Playername = ? AND Metakey = ?", params, false) != null);
         } finally {
@@ -93,9 +93,9 @@ public class PlayerMetadata {
     public boolean removeMeta(String key) {
         SSDatabase metadb = new SSDatabase(filename);
         try {
-            Map<Integer, Object> params = new LinkedHashMap<Integer, Object>();
+            Map<Integer, Object> params = new LinkedHashMap<>();
             params.put(1, plugin.getName());
-            params.put(2, ssPlayer.GetIdentifier().toString());
+            params.put(2, ssPlayer.getIdentifier().toString());
             params.put(3, key);
             return (metadb.runStatement("DELETE FROM PlayerMeta WHERE Plugin = ? AND Playername = ? AND Metakey = ?", params, false) != null);
         } finally {
@@ -106,9 +106,9 @@ public class PlayerMetadata {
     public boolean removeMetakeyLike(String key) {
         SSDatabase metadb = new SSDatabase(filename);
         try {
-            Map<Integer, Object> params = new LinkedHashMap<Integer, Object>();
+            Map<Integer, Object> params = new LinkedHashMap<>();
             params.put(1, plugin.getName());
-            params.put(2, ssPlayer.GetIdentifier().toString());
+            params.put(2, ssPlayer.getIdentifier().toString());
             params.put(3, key);
             return (metadb.runStatement("DELETE FROM PlayerMeta WHERE Plugin = ? AND Playername = ? AND Metakey LIKE ?", params, false) != null);
         } finally {
@@ -116,17 +116,18 @@ public class PlayerMetadata {
         }
     }
 
+
     /**
      * Attempts to convert all player names to UUID where needed
      * Called a single time on plugin startup
      * @param pPlugin Plugin
+     * @deprecated player UUIDs have existed since Minecraft 1.7.6. (over 5 years ago!) Legacy mode is no longer needed, and so is this method (I hope)
      */
     @SuppressWarnings("UnusedAssignment") // Assignment is used in case of exception
+    @Deprecated
     public static void convertToUuid(Plugin pPlugin) {
-        if(!PlayerIdentifier.GetUUIDSupport())
-            return; // Legacy mode
         SSDatabase metadb = new SSDatabase(filename);
-        Map<Integer, Object> params = new LinkedHashMap<Integer, Object>();
+        Map<Integer, Object> params = new LinkedHashMap<>();
         params.put(1, pPlugin.getName());
         ToConvert lastAttempt = null;
 
@@ -141,15 +142,15 @@ public class PlayerMetadata {
                 String metavalue = set.getString("Metavalue");
                 if(playername == null || metakey == null)
                     continue;
-                SignShopPlayer player = PlayerIdentifier.getPlayerFromString(playername);
+                SignShopPlayer player = PlayerIdentifier.getPlayerFromString(playername); //playername can be a UUID or Username
                 if(player == null)
                     continue;
                 // Adding a NPE check to solve an issue where SignShop is failing to load.
                 // Presumably the DB file is missing some necessary info, but in the sample
                 // case UUID conversion happened long ago so it does not need to happen again. 
-                if(player.GetIdentifier() == null)
+                if(player.getIdentifier() == null)
                     continue;
-                String id = player.GetIdentifier().toString();
+                String id = player.getIdentifier().toString();
                 if(!playername.equalsIgnoreCase(id))
                     toConverts.add(new ToConvert(playername, id, metakey, metavalue));
             }

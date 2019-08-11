@@ -13,15 +13,15 @@ import org.wargamer2010.signshop.SignShop;
 import org.wargamer2010.signshop.commands.CommandDispatcher;
 import org.wargamer2010.signshop.player.SignShopPlayer;
 
-public class commandUtil {
+public class CommandUtil {
     private static final String RootCommand = "signshop";
 
-    private commandUtil() {
+    private CommandUtil() {
 
     }
 
     public static void sendToPlayerOrConsole(String message, SignShopPlayer player) {
-        if(player != null)
+        if (player != null)
             player.sendMessage(message);
         else
             SignShop.log(message, Level.INFO);

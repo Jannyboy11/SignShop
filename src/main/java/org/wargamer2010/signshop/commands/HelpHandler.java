@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 import org.wargamer2010.signshop.configuration.SignShopConfig;
 import org.wargamer2010.signshop.player.SignShopPlayer;
-import org.wargamer2010.signshop.util.commandUtil;
-import org.wargamer2010.signshop.util.signshopUtil;
+import org.wargamer2010.signshop.util.CommandUtil;
+import org.wargamer2010.signshop.util.SignShopUtil;
 
 public class HelpHandler implements ICommandHandler {
     private static ICommandHandler instance = new HelpHandler();
@@ -57,11 +57,11 @@ public class HelpHandler implements ICommandHandler {
             return false;
 
         if(args.length == 0 && (command.equals("help") || command.isEmpty()))
-            messageBuilder.append(commandUtil.getAllCommands());
+            messageBuilder.append(CommandUtil.getAllCommands());
 
         String availableSigns = "Available Signs: ";
         String moreInfo = "\n\n(For more information about a sign, type /signshop sign SIGN, where SIGN is the sign's name from this list)";
-        String signList = commandUtil.getCommandList(getFilteredOperation(player), availableSigns, ",", false, "sign");
+        String signList = CommandUtil.getCommandList(getFilteredOperation(player), availableSigns, ",", false, "sign");
 
         if(command.equals("list")) {
             messageBuilder.append(signList);
@@ -71,7 +71,7 @@ public class HelpHandler implements ICommandHandler {
             messageBuilder.append(moreInfo);
         } else if(!command.isEmpty() && args.length > 0 && command.equals("sign")) {
             Map<String, String> messageParts = new LinkedHashMap<String, String>();
-            messageParts.put("!linkmaterial", signshopUtil.capFirstLetter(SignShopConfig.getLinkMaterial().name().toLowerCase()));
+            messageParts.put("!linkmaterial", SignShopUtil.capFirstLetter(SignShopConfig.getLinkMaterial().name().toLowerCase()));
 
             String temp = SignShopConfig.getMessage("help", args[0], messageParts).replace(". ", ".\n- ");
             if(temp.trim().isEmpty()) {
@@ -86,10 +86,10 @@ public class HelpHandler implements ICommandHandler {
             }
         } else {
             messageBuilder = new StringBuilder(200);
-            messageBuilder.append(commandUtil.getAllCommands());
+            messageBuilder.append(CommandUtil.getAllCommands());
         }
 
-        commandUtil.sendToPlayerOrConsole(messageBuilder.toString(), player);
+        CommandUtil.sendToPlayerOrConsole(messageBuilder.toString(), player);
         return true;
     }
 

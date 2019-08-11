@@ -15,7 +15,7 @@ public class ConvertChestshop implements SignShopSpecialOp {
         Player player = event.getPlayer();
         SignShopPlayer ssPlayer = new SignShopPlayer(player);
         Block sign = event.getClickedBlock();
-        if(!itemUtil.clickedSign(sign))
+        if(!ItemUtil.isSign(sign))
             return false;
 
         Block emptySign = null;
@@ -38,8 +38,8 @@ public class ConvertChestshop implements SignShopSpecialOp {
 
         Sign emptyBlock = null;
         if(emptySign != null)
-            emptyBlock = ((Sign)emptySign.getState());
-        if((sLines[2].contains("B")) && sLines[2].contains("S")) {
+            emptyBlock = ((Sign) emptySign.getState());
+        if(sLines[2].contains("B") && sLines[2].contains("S")) {
             if(emptyBlock == null) {
                 ssPlayer.sendMessage("ChestShop sign detected, punch an empty sign first!");
                 return false;
@@ -48,9 +48,9 @@ public class ConvertChestshop implements SignShopSpecialOp {
                 return false;
             String bits[] = sLines[2].split(":");
             if(bits[0].contains("S"))
-                iPrice = Math.round(economyUtil.parsePrice(bits[0]));
+                iPrice = Math.round(EconomyUtil.parsePrice(bits[0]));
             else if(bits[1].contains("S"))
-                iPrice = Math.round(economyUtil.parsePrice(bits[1]));
+                iPrice = Math.round(EconomyUtil.parsePrice(bits[1]));
             else
                 return false;
 
@@ -61,19 +61,19 @@ public class ConvertChestshop implements SignShopSpecialOp {
             emptyBlock.update();
 
             if(bits[0].contains("B"))
-                iPrice = Math.round(economyUtil.parsePrice(bits[0]));
+                iPrice = Math.round(EconomyUtil.parsePrice(bits[0]));
             else if(bits[1].contains("B"))
-                iPrice = Math.round(economyUtil.parsePrice(bits[1]));
+                iPrice = Math.round(EconomyUtil.parsePrice(bits[1]));
             else
                 return false;
             signblock.setLine(0, "[Buy]");
         } else if(sLines[2].contains("B")) {
-            iPrice = Math.round(economyUtil.parsePrice(sLines[2]));
+            iPrice = Math.round(EconomyUtil.parsePrice(sLines[2]));
             if(iPrice == 0.0f)
                 return false;
             signblock.setLine(0, "[Buy]");
         } else if(sLines[2].contains("S")) {
-            iPrice = Math.round(economyUtil.parsePrice(sLines[2]));
+            iPrice = Math.round(EconomyUtil.parsePrice(sLines[2]));
             if(iPrice == 0.0f)
                 return false;
             signblock.setLine(0, "[Sell]");
@@ -90,8 +90,8 @@ public class ConvertChestshop implements SignShopSpecialOp {
         return true;
     }
 
-    private Boolean emptySign(Block sign) {
-        if(!itemUtil.clickedSign(sign))
+    private boolean emptySign(Block sign) {
+        if(!ItemUtil.isSign(sign))
             return false;
         String[] sLines = ((Sign) sign.getState()).getLines();
         for(int i = 0; i < 4; i++)

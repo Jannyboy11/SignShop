@@ -6,7 +6,7 @@ import java.util.Map;
 import org.bukkit.Color;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.wargamer2010.signshop.util.signshopUtil;
+import org.wargamer2010.signshop.util.SignShopUtil;
 
 public class ColorUtil {
     private static Map<Integer, String> colorLookup = new HashMap<Integer, String>();
@@ -60,7 +60,7 @@ public class ColorUtil {
     public static String getColorAsString(Color color) {
         int rgb = color.asRGB();
         if(colorLookup.containsKey(rgb)) {
-            return signshopUtil.capFirstLetter(colorLookup.get(rgb));
+            return SignShopUtil.capFirstLetter(colorLookup.get(rgb));
         } else {
             double diff = -1;
             String last = "";
@@ -71,7 +71,7 @@ public class ColorUtil {
                     last = colorLookup.get(val);
                 }
             }
-            return signshopUtil.capFirstLetter(last);
+            return SignShopUtil.capFirstLetter(last);
         }
     }
 

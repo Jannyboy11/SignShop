@@ -182,6 +182,7 @@ errors:
   already_off: Het apparaat staat al uit
   link_notallowed: Je mag dat block niet linken!
   item_already_repair: Dat item is al volledig gerepareerd!
+  touch_notallowed: Je mag !owner's winkel niet aanraken!
   already_raining: Het regent al!
   already_clear_skies: Het zonnetje schijnt al!
   already_full_health: Je bent al volledig fit!

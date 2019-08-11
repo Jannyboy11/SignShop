@@ -5,7 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import java.util.List;
 import java.util.Map;
-import org.wargamer2010.signshop.Seller;
+import org.wargamer2010.signshop.Shop;
 import org.wargamer2010.signshop.configuration.SignShopConfig;
 import org.wargamer2010.signshop.configuration.Storage;
 import org.wargamer2010.signshop.player.PlayerIdentifier;
@@ -18,33 +18,33 @@ public class ChangeOwner implements SignShopSpecialOp {
         Player player = event.getPlayer();
         SignShopPlayer ssPlayer = new SignShopPlayer(player);
         Block shopSign = event.getClickedBlock();
-        Seller seller = Storage.get().getSeller(shopSign.getLocation());
-        if(seller == null)
+        Shop shop = Storage.get().getShop(shopSign.getLocation());
+        if(shop == null)
             return false;
-        if(!clicks.mClicksPerPlayerId.containsValue(player))
+        if(!Clicks.mClicksPerPlayerId.containsValue(player))
             return false;
         if(!ssPlayer.hasPerm("SignShop.ChangeOwner", true)) {
             ssPlayer.sendMessage(SignShopConfig.getError("no_permission_changeowner", null));
             return false;
         }
-        if(!seller.isOwner(ssPlayer) && !ssPlayer.hasPerm("SignShop.ChangeOwner.Others", true)) {
+        if(!shop.isOwner(ssPlayer) && !ssPlayer.hasPerm("SignShop.ChangeOwner.Others", true)) {
             ssPlayer.sendMessage(SignShopConfig.getError("no_permission_changeowner", null));
             return false;
         }
-        PlayerIdentifier newOwner = null;
-        for(Map.Entry<PlayerIdentifier, Player> entry : clicks.mClicksPerPlayerId.entrySet()) {
+        PlayerIdentifier newOwnerId = null;
+        for(Map.Entry<PlayerIdentifier, Player> entry : Clicks.mClicksPerPlayerId.entrySet()) {
             if(entry.getValue() == player) {
-                newOwner = entry.getKey();
+                newOwnerId = entry.getKey();
                 break;
             }
         }
-        if(newOwner == null)
+        if(newOwnerId == null)
             return false;
 
-        seller.setOwner(new SignShopPlayer(newOwner));
-        Storage.get().Save();
-        ssPlayer.sendMessage("Succesfully changed ownership of shop to " + newOwner.getName());
-        clicks.mClicksPerPlayerId.remove(newOwner);
+        shop.setOwner(new SignShopPlayer(newOwnerId));
+        Storage.get().save();
+        ssPlayer.sendMessage("Succesfully changed ownership of shop to " + newOwnerId.getName());
+        Clicks.mClicksPerPlayerId.remove(newOwnerId);
         return true;
     }
 }

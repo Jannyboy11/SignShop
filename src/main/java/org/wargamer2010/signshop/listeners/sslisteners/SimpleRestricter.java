@@ -6,7 +6,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.wargamer2010.signshop.configuration.SignShopConfig;
 import org.wargamer2010.signshop.events.SSPreTransactionEvent;
-import org.wargamer2010.signshop.util.signshopUtil;
+import org.wargamer2010.signshop.util.SignShopUtil;
 
 public class SimpleRestricter implements Listener {
 
@@ -14,7 +14,7 @@ public class SimpleRestricter implements Listener {
     public void onSSPreTransactionEvent(SSPreTransactionEvent event) {
         if(event.isCancelled() || !event.canBeCancelled())
             return;
-        if(signshopUtil.restrictedFromUsing(event.getShop(), event.getPlayer())) {
+        if(SignShopUtil.restrictedFromUsing(event.getShop(), event.getPlayer())) {
             event.getPlayer().sendMessage(SignShopConfig.getError("restricted_from_using", null));
             event.setCancelled(true);
         }

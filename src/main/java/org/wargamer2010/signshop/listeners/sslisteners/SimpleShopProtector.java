@@ -15,29 +15,29 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
-import org.wargamer2010.signshop.Seller;
+import org.wargamer2010.signshop.Shop;
 import org.wargamer2010.signshop.SignShop;
 import org.wargamer2010.signshop.configuration.SignShopConfig;
 import org.wargamer2010.signshop.configuration.Storage;
-import org.wargamer2010.signshop.events.SSCreatedEvent;
-import org.wargamer2010.signshop.events.SSDestroyedEvent;
-import org.wargamer2010.signshop.events.SSDestroyedEventType;
-import org.wargamer2010.signshop.events.SSEventFactory;
+import org.wargamer2010.signshop.events.*;
 import org.wargamer2010.signshop.hooks.HookManager;
 import org.wargamer2010.signshop.operations.SignShopArguments;
 import org.wargamer2010.signshop.operations.SignShopArgumentsType;
 import org.wargamer2010.signshop.operations.SignShopOperationListItem;
 import org.wargamer2010.signshop.player.SignShopPlayer;
-import org.wargamer2010.signshop.util.economyUtil;
-import org.wargamer2010.signshop.util.itemUtil;
-import org.wargamer2010.signshop.util.signshopUtil;
+import org.wargamer2010.signshop.util.EconomyUtil;
+import org.wargamer2010.signshop.util.ItemUtil;
+import org.wargamer2010.signshop.util.SignShopUtil;
 
 public class SimpleShopProtector implements Listener {
-    private Boolean canDestroy(Player player, Block bBlock) {
+
+    private boolean canDestroy(Player player, Block block) {
+        if (player == null || block == null) return false;
+
         SignShopPlayer ssPlayer = new SignShopPlayer(player);
-        if(itemUtil.clickedSign(bBlock)) {
-            Seller seller = Storage.get().getSeller(bBlock.getLocation());
-            if(seller == null || seller.isOwner(ssPlayer) || SignShopPlayer.isOp(player) || !SignShopConfig.getEnableShopOwnerProtection())
+        if(ItemUtil.isSign(block)) {
+            Shop shop = Storage.get().getShop(block.getLocation());
+            if (shop == null || shop.isOwner(ssPlayer) || SignShopPlayer.isOp(player) || !SignShopConfig.getEnableShopOwnerProtection())
                 return true;
             else
                 return false;
@@ -46,11 +46,11 @@ public class SimpleShopProtector implements Listener {
     }
 
     private void cleanUpMiscStuff(String miscname, Block block) {
-        List<Block> shopsWithSharesign = Storage.get().getShopsWithMiscSetting(miscname, signshopUtil.convertLocationToString(block.getLocation()));
+        List<Block> shopsWithSharesign = Storage.get().getShopsWithMiscSetting(miscname, SignShopUtil.convertLocationToString(block.getLocation()));
         for(Block bTemp : shopsWithSharesign) {
-            Seller seller = Storage.get().getSeller(bTemp.getLocation());
-            String temp = seller.getMisc(miscname);
-            temp = temp.replace(signshopUtil.convertLocationToString(block.getLocation()), "");
+            Shop shop = Storage.get().getShop(bTemp.getLocation());
+            String temp = shop.getMisc(miscname);
+            temp = temp.replace(SignShopUtil.convertLocationToString(block.getLocation()), "");
             temp = temp.replace(SignShopArguments.seperator+SignShopArguments.seperator, SignShopArguments.seperator);
             if(temp.length() > 0) {
                 if(temp.endsWith(SignShopArguments.seperator))
@@ -59,35 +59,35 @@ public class SimpleShopProtector implements Listener {
                     temp = temp.substring(1, temp.length());
             }
             if(temp.length() == 0)
-                seller.removeMisc(miscname);
+                shop.removeMisc(miscname);
             else
-                seller.addMisc(miscname, temp);
+                shop.addMisc(miscname, temp);
         }
     }
 
-    private boolean isShopBrokenAfterBlockUnlink(Seller seller, Block toUnlink) {
+    private boolean isShopBrokenAfterBlockUnlink(Shop shop, Block toUnlink) {
         List<Block> containables = new LinkedList<Block>();
-        containables.addAll(seller.getContainables());
+        containables.addAll(shop.getContainables());
         List<Block> activatables = new LinkedList<Block>();
-        activatables.addAll(seller.getActivatables());
+        activatables.addAll(shop.getActivatables());
 
         if(containables.contains(toUnlink))
             containables.remove(toUnlink);
         if(activatables.contains(toUnlink))
             activatables.remove(toUnlink);
 
-        SignShopPlayer ssPlayer = new SignShopPlayer(seller.getOwner().GetIdentifier());
+        SignShopPlayer ssPlayer = new SignShopPlayer(shop.getOwner().getIdentifier());
         ssPlayer.setIgnoreMessages(true);
 
-        if(!(seller.getSign().getState() instanceof Sign))
+        if(!(shop.getSign().getState() instanceof Sign))
             return true;
-        Sign sign = (Sign) seller.getSign().getState();
+        Sign sign = (Sign) shop.getSign().getState();
 
-        SignShopArguments ssArgs = new SignShopArguments(economyUtil.parsePrice(sign.getLines()[3]), seller.getItems(), containables, activatables,
-                ssPlayer, seller.getOwner(), seller.getSign(), seller.getOperation(), BlockFace.DOWN, Action.LEFT_CLICK_BLOCK, SignShopArgumentsType.Setup);
+        SignShopArguments ssArgs = new SignShopArguments(EconomyUtil.parsePrice(sign.getLines()[3]), shop.getItems(), containables, activatables,
+                ssPlayer, shop.getOwner(), shop.getSign(), shop.getOperation(), BlockFace.DOWN, Action.LEFT_CLICK_BLOCK, SignShopArgumentsType.Setup);
 
-        List<String> operation = SignShopConfig.getBlocks(seller.getOperation());
-        List<SignShopOperationListItem> SignShopOperations = signshopUtil.getSignShopOps(operation);
+        List<String> operation = SignShopConfig.getBlocks(shop.getOperation());
+        List<SignShopOperationListItem> SignShopOperations = SignShopUtil.getSignShopOps(operation);
         if (SignShopOperations == null)
             return true;
 
@@ -108,79 +108,100 @@ public class SimpleShopProtector implements Listener {
         }
 
         SSCreatedEvent createdevent = SSEventFactory.generateCreatedEvent(ssArgs);
-        SignShop.scheduleEvent(createdevent);
+        SignShop.callEvent(createdevent);
         if(createdevent.isCancelled()) {
             return true;
         }
 
-        Storage.get().updateSeller(seller.getSign(), containables, activatables);
+        Storage.get().updateShop(shop.getSign(), containables, activatables);
         return false;
     }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onSSDestroyEvent(SSDestroyedEvent event) {
-        if(event.isCancelled() || !event.canBeCancelled())
+        if (event.isCancelled() || !event.canBeCancelled())
             return;
 
         // Check if the shop is being destroyed by something other than a player
         // If that is the case, we'd like to cancel it as shops shouldn't burn to the ground
-        if(event.getPlayer().getPlayer() == null) {
+        SignShopPlayer ssPlayer = event.getPlayer();
+        if (ssPlayer == null || ssPlayer.getPlayer() == null) {
             event.setCancelled(true);
             return;
         }
 
-        SignShopPlayer player = event.getPlayer();
+        if (event.hasPlayer()) {
+            if (ssPlayer.getPlayer().getGameMode() == GameMode.CREATIVE
+                    && SignShopConfig.getProtectShopsInCreative()
+                    && (ssPlayer.getItemInHand() == null || ssPlayer.getItemInHand().getType() != SignShopConfig.getDestroyMaterial())) {
+                event.setCancelled(true);
 
-        if(player.getPlayer().getGameMode() == GameMode.CREATIVE
-                && SignShopConfig.getProtectShopsInCreative()
-                && (player.getItemInHand() == null || player.getItemInHand().getType() != SignShopConfig.getDestroyMaterial())) {
-            event.setCancelled(true);
+                if (event.getShop().isOwner(ssPlayer) || ssPlayer.isOp()) {
+                    Map<String, String> temp = new LinkedHashMap<>();
+                    temp.put("!destroymaterial", SignShopUtil.capFirstLetter(SignShopConfig.getDestroyMaterial().name().toLowerCase()));
 
-            if(event.getShop().isOwner(player) || event.getPlayer().isOp()) {
-                Map<String, String> temp = new LinkedHashMap<String, String>();
-                temp.put("!destroymaterial", signshopUtil.capFirstLetter(SignShopConfig.getDestroyMaterial().name().toLowerCase()));
-
-                event.getPlayer().sendMessage(SignShopConfig.getError("use_item_to_destroy_shop", temp));
+                    if (event.hasPlayer()) {
+                        event.getPlayer().sendMessage(SignShopConfig.getError("use_item_to_destroy_shop", temp));
+                    }
+                }
+                return;
             }
-            return;
-        }
 
-        Boolean bCanDestroy = canDestroy(player.getPlayer(), event.getBlock());
-        if(!bCanDestroy)
-            event.setCancelled(true);
+            boolean bCanDestroy = canDestroy(ssPlayer.getPlayer(), event.getBlock());
+            if (!bCanDestroy) {
+                event.setCancelled(true);
+            }
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onSSDestroyCleanup(SSDestroyedEvent event) {
-        if(event.isCancelled())
+        if (event.isCancelled())
             return;
 
-        if(event.getReason() == SSDestroyedEventType.sign) {
-            if(event.getShop() != null && event.getShop().getSign() != null)
-                itemUtil.setSignStatus(event.getShop().getSign(), ChatColor.BLACK);
-            Storage.get().removeSeller(event.getBlock().getLocation());
-        } else if(event.getReason() == SSDestroyedEventType.miscblock) {
+        if (event.getReason() == SSDestroyedEventType.SIGN) {
+            if (event.getShop() != null && event.getShop().getSign() != null)
+                ItemUtil.setSignStatus(event.getShop().getSign(), ChatColor.BLACK);
+            Storage.get().removeShop(event.getBlock().getLocation());
+        } else if (event.getReason() == SSDestroyedEventType.MISC_BLOCK) {
             cleanUpMiscStuff("sharesigns", event.getBlock());
             cleanUpMiscStuff("restrictedsigns", event.getBlock());
-        } else if(event.getReason() == SSDestroyedEventType.attachable) {
+        } else if (event.getReason() == SSDestroyedEventType.ATTACHABLE) {
             // More shops might be attached to this attachable, but the event will be fired multiple times
-            if(isShopBrokenAfterBlockUnlink(event.getShop(), event.getBlock())) {
+            if (isShopBrokenAfterBlockUnlink(event.getShop(), event.getBlock())) {
                 // Shop can not be updated without breaking functionality
-                itemUtil.setSignStatus(event.getShop().getSign(), ChatColor.BLACK);
-                Storage.get().removeSeller(event.getShop().getSignLocation());
+                ItemUtil.setSignStatus(event.getShop().getSign(), ChatColor.BLACK);
+                Storage.get().removeShop(event.getShop().getSignLocation());
             }
         }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onSSCreatedEvent(SSCreatedEvent event) {
-        if(event.isCancelled() || !SignShopConfig.getEnableAutomaticLock())
+        if (event.isCancelled() || !SignShopConfig.getEnableAutomaticLock())
             return;
 
-        for(Block containable : event.getContainables()) {
-            if(HookManager.protectBlock(event.getPlayer().getPlayer(), containable))
+        for (Block containable : event.getContainables()) {
+            if (HookManager.protectBlock(event.getPlayer().getPlayer(), containable))
                 event.getPlayer().sendMessage(SignShopConfig.getError("shop_is_now_protected", event.getMessageParts()));
         }
+    }
 
+    @EventHandler
+    public void onSSItemMove(SSItemMoveEvent event) {
+        //TODO make this configurable?! allow hoppers/droppers to be marked as allowed transfer blocks?
+        //TODO can even customize this using permissions since the owner of a shop is a player
+        event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onSSShopTouch(SSTouchShopEvent event) {
+        Shop touchedShop = event.getShop();
+        SignShopPlayer ssPlayer = event.getPlayer();
+
+        //cancel by default if the toucher is not the owner nor an admin
+        if (!touchedShop.isOwner(ssPlayer) && !ssPlayer.hasPerm("SignShop.TouchShop", true)){
+            event.setCancelled(true);
+        }
     }
 }

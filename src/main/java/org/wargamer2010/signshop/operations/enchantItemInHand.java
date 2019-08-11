@@ -10,8 +10,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import org.bukkit.Material;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
-import org.wargamer2010.signshop.util.itemUtil;
-import org.wargamer2010.signshop.util.signshopUtil;
+import org.wargamer2010.signshop.util.ItemUtil;
+import org.wargamer2010.signshop.util.SignShopUtil;
 import org.wargamer2010.signshop.configuration.SignShopConfig;
 
 public class enchantItemInHand implements SignShopOperation {
@@ -53,8 +53,8 @@ public class enchantItemInHand implements SignShopOperation {
             ssArgs.getPlayer().get().sendMessage(SignShopConfig.getError("enchantment_missing", ssArgs.getMessageParts()));
             return false;
         }
-        ssArgs.miscSettings.put("enchantmentInHand", signshopUtil.convertEnchantmentsToString(AllEnchantments));
-        ssArgs.setMessagePart("!enchantments", itemUtil.enchantmentsToMessageFormat(AllEnchantments));
+        ssArgs.miscSettings.put("enchantmentInHand", SignShopUtil.convertEnchantmentsToString(AllEnchantments));
+        ssArgs.setMessagePart("!enchantments", ItemUtil.enchantmentsToMessageFormat(AllEnchantments));
         return true;
     }
 
@@ -63,23 +63,23 @@ public class enchantItemInHand implements SignShopOperation {
         if(ssArgs.getPlayer().get().getPlayer() == null)
             return true;
         if(!ssArgs.miscSettings.containsKey("enchantmentInHand")) {
-            SignShop.log(("misc property enchantmentInHand was not found for shop @ " + signshopUtil.convertLocationToString(ssArgs.getSign().get().getLocation())), Level.WARNING);
+            SignShop.log(("misc property enchantmentInHand was not found for shop @ " + SignShopUtil.convertLocationToString(ssArgs.getSign().get().getLocation())), Level.WARNING);
             return false;
         }
-        Map<Enchantment, Integer> enchantments = signshopUtil.convertStringToEnchantments(ssArgs.miscSettings.get("enchantmentInHand"));
-        String enchantmentsString = itemUtil.enchantmentsToMessageFormat(enchantments);
+        Map<Enchantment, Integer> enchantments = SignShopUtil.convertStringToEnchantments(ssArgs.miscSettings.get("enchantmentInHand"));
+        String enchantmentsString = ItemUtil.enchantmentsToMessageFormat(enchantments);
         ssArgs.setMessagePart("!enchantments", enchantmentsString);
         ItemStack isInHand = ssArgs.getPlayer().get().getItemInHand();
-        ItemStack isBackup = itemUtil.getBackupSingleItemStack(isInHand);
+        ItemStack isBackup = ItemUtil.getBackupItemStack(isInHand);
         if(isInHand == null) {
             ssArgs.sendFailedRequirementsMessage("item_not_enchantable");
             return false;
-        } else if(!itemUtil.needsEnchantment(isBackup, enchantments)) {
+        } else if(!ItemUtil.needsEnchantment(isBackup, enchantments)) {
             ssArgs.sendFailedRequirementsMessage("item_already_enchanted");
             return false;
         }
         
-        if(!itemUtil.safelyAddEnchantments(isBackup, enchantments)) {
+        if(!ItemUtil.safelyAddEnchantments(isBackup, enchantments)) {
             ssArgs.sendFailedRequirementsMessage("item_not_enchantable");
             return false;
         }
@@ -89,10 +89,10 @@ public class enchantItemInHand implements SignShopOperation {
     @Override
     public Boolean runOperation(SignShopArguments ssArgs) {
         ItemStack isInHand = ssArgs.getPlayer().get().getItemInHand();
-        Map<Enchantment, Integer> enchantments = signshopUtil.convertStringToEnchantments(ssArgs.miscSettings.get("enchantmentInHand"));
+        Map<Enchantment, Integer> enchantments = SignShopUtil.convertStringToEnchantments(ssArgs.miscSettings.get("enchantmentInHand"));
         
         if(isInHand.getAmount() > 1) {
-            ItemStack single = itemUtil.getBackupSingleItemStack(isInHand);
+            ItemStack single = ItemUtil.getBackupItemStack(isInHand);
             single.setAmount(1);
             
             ItemStack[] singleStacks = new ItemStack[] { single };
@@ -102,13 +102,13 @@ public class enchantItemInHand implements SignShopOperation {
                 return false;
             }
             
-            boolean didEnchantment = itemUtil.safelyAddEnchantments(single, enchantments);
+            boolean didEnchantment = ItemUtil.safelyAddEnchantments(single, enchantments);
             if(!didEnchantment)
                 return false;
             
             Map<Integer, ItemStack> given = ssArgs.getPlayer().get().givePlayerItems(singleStacks);
             if(!given.isEmpty()) {
-                ItemStack singleOriginal = itemUtil.getBackupSingleItemStack(isInHand);
+                ItemStack singleOriginal = ItemUtil.getBackupItemStack(isInHand);
                 singleOriginal.setAmount(1);
                 given = ssArgs.getPlayer().get().givePlayerItems(new ItemStack[] { singleOriginal });
                 
@@ -127,7 +127,7 @@ public class enchantItemInHand implements SignShopOperation {
             
             return true;
         } else {
-            return itemUtil.safelyAddEnchantments(isInHand, enchantments);
+            return ItemUtil.safelyAddEnchantments(isInHand, enchantments);
         }
     }
 }

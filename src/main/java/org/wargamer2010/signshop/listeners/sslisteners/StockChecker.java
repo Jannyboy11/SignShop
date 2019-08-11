@@ -9,7 +9,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.inventory.ItemStack;
 import org.wargamer2010.signshop.configuration.SignShopConfig;
 import org.wargamer2010.signshop.events.SSPreTransactionEvent;
-import org.wargamer2010.signshop.util.itemUtil;
+import org.wargamer2010.signshop.util.ItemUtil;
 
 public class StockChecker implements Listener {
     
@@ -27,10 +27,10 @@ public class StockChecker implements Listener {
         if(operation.contains("playerIsOp"))
             return;
         
-        ItemStack[] allStacks = itemUtil.getAllItemStacksForContainables(event.getShop().getContainables());
-        ItemStack[] filtered = itemUtil.filterStacks(allStacks, event.getShop().getItems());
+        ItemStack[] allStacks = ItemUtil.getAllItemStacksForContainables(event.getShop().getContainables());
+        ItemStack[] filtered = ItemUtil.filterStacks(allStacks, event.getShop().getItems());
         
-        event.setMessagePart("!shopinventory", (filtered.length == 0 ? "nothing" : itemUtil.itemStackToString(filtered)));
+        event.setMessagePart("!shopinventory", (filtered.length == 0 ? "nothing" : ItemUtil.itemStackToString(filtered)));
         event.getPlayer().sendMessage(SignShopConfig.getError("shop_contains", event.getMessageParts()));
     }
 }

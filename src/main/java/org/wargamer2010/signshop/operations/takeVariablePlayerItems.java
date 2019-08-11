@@ -1,18 +1,15 @@
 package org.wargamer2010.signshop.operations;
 
-import java.util.Collections;
-import java.util.Comparator;
-import org.bukkit.entity.Player;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
 import org.bukkit.inventory.ItemStack;
-import org.wargamer2010.signshop.util.itemUtil;
+import org.wargamer2010.signshop.util.ItemUtil;
 import org.wargamer2010.signshop.configuration.SignShopConfig;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import org.bukkit.Material;
 import org.wargamer2010.signshop.player.SignShopPlayer;
-import org.wargamer2010.signshop.util.signshopUtil;
+import org.wargamer2010.signshop.util.SignShopUtil;
 
 public class takeVariablePlayerItems implements SignShopOperation {
 
@@ -21,7 +18,7 @@ public class takeVariablePlayerItems implements SignShopOperation {
         if(ssArgs.isOperationParameter("acceptdamaged")) {
             short nodamage = 0;
             Material mat;
-            Map<ItemStack, Integer> map = itemUtil.StackToMap(ssArgs.getItems().get());
+            Map<ItemStack, Integer> map = ItemUtil.stacksToMap(ssArgs.getItems().get());
             if(map.size() > 1) {
                 ssArgs.getPlayer().get().sendMessage(SignShopConfig.getError("damaged_items_shop_homogeneous", ssArgs.getMessageParts()));
                 return false;
@@ -42,37 +39,34 @@ public class takeVariablePlayerItems implements SignShopOperation {
     }
 
     private ItemStack[] getRealItemStack(ItemStack[] playerinv, ItemStack[] actual) {
-        List<StackDurabilityPair> sortedbydurability = new LinkedList<StackDurabilityPair>();
-        for(ItemStack playerstack : playerinv) {
-            if(playerstack != null)
-                sortedbydurability.add(new StackDurabilityPair(playerstack, playerstack.getDurability()));
-        }
-        Collections.sort(sortedbydurability, new StackDurabilityPair());
+        List<ItemStack> sortedByDurability = StreamSupport.stream(Spliterators.<ItemStack>spliterator(playerinv, 0), false)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        //TODO how to do this the appropiate way in mc 1.13+? why does it need to be sorted anyway?
+        sortedByDurability.sort(Comparator.comparing(ItemStack::getDurability)); //sorts in-place because Collectors.toList() supplies an ArrayList :)
 
-        Map<ItemStack, Integer> map = itemUtil.StackToMap(actual);
+        Map<ItemStack, Integer> map = ItemUtil.stacksToMap(actual);
         ItemStack neededstack;
         int needed;
-        List<ItemStack> toTakeForReal = new LinkedList<ItemStack>();
+        List<ItemStack> toTakeForReal = new LinkedList<>();
 
-        for(Map.Entry<ItemStack, Integer> entry : map.entrySet()) {
+        for (Map.Entry<ItemStack, Integer> entry : map.entrySet()) {
             neededstack = entry.getKey();
             needed = entry.getValue();
-            for(StackDurabilityPair pair : sortedbydurability) {
-                ItemStack stackfrominv = pair.getStack();
-                if(itemUtil.itemstackEqual(stackfrominv, neededstack, true)) {
-                    ItemStack bak = itemUtil.getBackupSingleItemStack(stackfrominv);
-                    if(bak.getAmount() >= needed)
-                        bak.setAmount(needed);
-                    toTakeForReal.add(bak);
-                    needed -= bak.getAmount();
-                    if(needed <= 0)
+            for (ItemStack stackFromInventory : sortedByDurability) {
+                if (ItemUtil.isItemStackSimilar(stackFromInventory, neededstack, true)) {
+                    ItemStack backupSingleItemStack = ItemUtil.getBackupItemStack(stackFromInventory);
+                    if (backupSingleItemStack.getAmount() >= needed)
+                        backupSingleItemStack.setAmount(needed);
+                    toTakeForReal.add(backupSingleItemStack);
+                    needed -= backupSingleItemStack.getAmount();
+                    if (needed <= 0)
                         break;
                 }
             }
         }
 
-        ItemStack[] arr = new ItemStack[toTakeForReal.size()];
-        return toTakeForReal.toArray(arr);
+        return toTakeForReal.toArray(new ItemStack[toTakeForReal.size()]);
     }
 
     @Override
@@ -83,55 +77,63 @@ public class takeVariablePlayerItems implements SignShopOperation {
             ssArgs.getPlayer().get().sendMessage(SignShopConfig.getError("chest_missing", ssArgs.getMessageParts()));
             return false;
         }
-        ItemStack[] isTotalItems = itemUtil.getAllItemStacksForContainables(ssArgs.getContainables().get());
+        ItemStack[] isTotalItems = ItemUtil.getAllItemStacksForContainables(ssArgs.getContainables().get());
 
-        if(isTotalItems.length == 0) {
+        if (isTotalItems.length == 0) {
             ssArgs.getPlayer().get().sendMessage(SignShopConfig.getError("chest_empty", ssArgs.getMessageParts()));
             return false;
         }
+
         ssArgs.getItems().set(isTotalItems);
-        ssArgs.setMessagePart("!items", itemUtil.itemStackToString(ssArgs.getItems().get()));
+        ssArgs.setMessagePart("!items", ItemUtil.itemStackToString(ssArgs.getItems().get()));
         return true;
     }
 
     @Override
     public Boolean checkRequirements(SignShopArguments ssArgs, Boolean activeCheck) {
-        if(!ssArgs.isPlayerOnline())
+        if (!ssArgs.isPlayerOnline())
             return true;
-        if(ssArgs.getItems().get() == null) {
+        if (ssArgs.getItems().get() == null) {
             ssArgs.getPlayer().get().sendMessage(SignShopConfig.getError("no_items_defined_for_shop", ssArgs.getMessageParts()));
             return false;
         }
 
-        ItemStack[] backupinv = itemUtil.getBackupItemStack(ssArgs.getPlayer().get().getInventoryContents());
-        boolean didnull = doDurabilityNullification(ssArgs);
+        //don't call the getBackupItemStack(ItemStack[]) overload because it filters null elements - we wan't the null stacks too!
+        ItemStack[] backupInventory = Arrays
+                .stream(ssArgs.getPlayer().get().getInventoryContents())
+                .map(ItemUtil::getBackupItemStack)
+                .toArray(ItemStack[]::new);
+        boolean didNullifyDurability = doDurabilityNullification(ssArgs);
 
         SignShopPlayer ssPlayer = ssArgs.getPlayer().get();
 
-        ssArgs.setMessagePart("!items", itemUtil.itemStackToString(ssArgs.getItems().get()));
+        ssArgs.setMessagePart("!items", ItemUtil.itemStackToString(ssArgs.getItems().get()));
         HashMap<ItemStack[], Double> variableAmount = ssPlayer.getVirtualInventory().variableAmount(ssArgs.getItems().get());
-        Double iCount = (Double)variableAmount.values().toArray()[0];
+        //TODO why an arbitrary value from the map? it seems like HashMap may not have been the right type after all
+        Double iCount = (Double)variableAmount.values().toArray()[0]; //TODO I suspect the Map only ever has one entry.
 
-        ssArgs.getPlayer().get().setInventoryContents(backupinv);
+        //TODO why is this even needed? the other methods don't alter the player's inventory contents, do they?
+        //TODO the virtual inventory shouldn't touch the player's inventory
+        ssArgs.getPlayer().get().setInventoryContents(backupInventory);
 
-        ItemStack[] isActual = (ItemStack[])variableAmount.keySet().toArray()[0];
+        ItemStack[] isActual = (ItemStack[]) variableAmount.keySet().toArray()[0]; //TODO similar here
         double pricemod = 1.0d;
-        if(didnull) {
-            ItemStack[] temp = getRealItemStack(backupinv, isActual);
-            if(temp.length > 0) {
+        if (didNullifyDurability) {
+            ItemStack[] temp = getRealItemStack(backupInventory, isActual);
+            if (temp.length > 0) {
                 isActual = temp;
-                pricemod = signshopUtil.calculateDurabilityModifier(isActual);
+                pricemod = SignShopUtil.calculateDurabilityModifier(isActual);
             }
         }
 
         ssArgs.getItems().set(isActual);
-        ssArgs.setMessagePart("!items", itemUtil.itemStackToString(ssArgs.getItems().get()));
-        if(iCount != 0.0d)
+        ssArgs.setMessagePart("!items", ItemUtil.itemStackToString(ssArgs.getItems().get()));
+        if (Double.doubleToRawLongBits(iCount) == Double.doubleToRawLongBits(0d))
             ssArgs.getPrice().set(ssArgs.getPrice().get() * iCount * pricemod);
         else
             ssArgs.getPrice().set(ssArgs.getPrice().get() * pricemod);
 
-        if(iCount == 0.0d) {
+        if (Double.doubleToRawLongBits(iCount) == Double.doubleToRawLongBits(0d)) {
             ssArgs.sendFailedRequirementsMessage("player_doesnt_have_items");
             return false;
         }
@@ -140,41 +142,14 @@ public class takeVariablePlayerItems implements SignShopOperation {
 
     @Override
     public Boolean runOperation(SignShopArguments ssArgs) {
-        if(!checkRequirements(ssArgs, true))
+        if (!checkRequirements(ssArgs, true))
             return false;
+
         boolean transactedAll = ssArgs.getPlayer().get().takePlayerItems(ssArgs.getItems().get()).isEmpty();
-        if(!transactedAll)
+        if (!transactedAll)
             ssArgs.getPlayer().get().sendMessage(SignShopConfig.getError("could_not_complete_operation", null));
+
         return transactedAll;
     }
 
-    private static class StackDurabilityPair implements Comparator<StackDurabilityPair> {
-        private ItemStack stack;
-        private Short durability;
-
-        private StackDurabilityPair(ItemStack stack, Short durability) {
-            this.stack = stack;
-            this.durability = durability;
-        }
-
-        private StackDurabilityPair() {
-
-        }
-
-        public ItemStack getStack() {
-            return stack;
-        }
-
-        public Short getDurability() {
-            return durability;
-        }
-
-        @Override
-        public int compare(StackDurabilityPair o1, StackDurabilityPair o2) {
-            if (!(o1 instanceof StackDurabilityPair) || !(o2 instanceof StackDurabilityPair))
-                throw new ClassCastException();
-
-            return (o1.getDurability() - o2.getDurability());
-        }
-    }
 }

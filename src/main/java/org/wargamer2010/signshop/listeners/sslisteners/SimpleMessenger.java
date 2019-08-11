@@ -8,6 +8,8 @@ import org.wargamer2010.signshop.configuration.SignShopConfig;
 import org.wargamer2010.signshop.events.SSPostTransactionEvent;
 import org.wargamer2010.signshop.events.SSCreatedEvent;
 
+//TODO this is not how event listeners should be used!!!
+//TODO the messages should be in the logic that executes the events
 public class SimpleMessenger implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)

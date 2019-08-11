@@ -2,9 +2,10 @@ package org.wargamer2010.signshop.hooks;
 
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import com.bekvon.bukkit.residence.Residence;
-import com.bekvon.bukkit.residence.protection.ClaimedResidence;
+//import com.bekvon.bukkit.residence.Residence;
+//import com.bekvon.bukkit.residence.protection.ClaimedResidence;
 
+//residence is a pain to compile becuase it's not a maven project and I don't want to recreate its pom.
 public class ResidenceHook implements Hook {
 
     @Override
@@ -14,14 +15,14 @@ public class ResidenceHook implements Hook {
 
     @Override
     public Boolean canBuild(Player player, Block block) {
-        if(HookManager.getHook("Residence") == null)
-            return true;
-        ClaimedResidence res = Residence.getResidenceManager().getByLoc(block.getLocation());
-        if(res != null) {
-            if(!res.getPermissions().playerHas(player.getName(), "container", false) && !Residence.isResAdminOn(player)) {
-                return false;
-            }
-        }
+//        if(HookManager.getHook("Residence") == null)
+//            return true;
+//        ClaimedResidence res = Residence.getResidenceManager().getByLoc(block.getLocation());
+//        if(res != null) {
+//            if(!res.getPermissions().playerHas(player.getName(), "container", false) && !Residence.isResAdminOn(player)) {
+//                return false;
+//            }
+//        }
         return true;
     }
 

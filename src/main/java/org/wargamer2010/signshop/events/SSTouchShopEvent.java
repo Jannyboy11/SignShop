@@ -2,7 +2,7 @@ package org.wargamer2010.signshop.events;
 
 import org.bukkit.block.Block;
 import org.bukkit.event.HandlerList;
-import org.wargamer2010.signshop.Seller;
+import org.wargamer2010.signshop.Shop;
 import org.wargamer2010.signshop.player.SignShopPlayer;
 import org.bukkit.event.block.Action;
 
@@ -10,11 +10,11 @@ public class SSTouchShopEvent extends SSEvent {
     private static final HandlerList handlers = new HandlerList();
 
     private SignShopPlayer ssPlayer = null;
-    private Seller seShop = null;
+    private Shop seShop = null;
     private Action aAction = Action.PHYSICAL;
     private Block bBlock = null;
 
-    public SSTouchShopEvent(SignShopPlayer pPlayer, Seller pShop, Action pAction, Block pBlock) {
+    public SSTouchShopEvent(SignShopPlayer pPlayer, Shop pShop, Action pAction, Block pBlock) {
         ssPlayer = pPlayer;
         seShop = pShop;
         aAction = pAction;
@@ -34,7 +34,7 @@ public class SSTouchShopEvent extends SSEvent {
         return ssPlayer;
     }
 
-    public Seller getShop() {
+    public Shop getShop() {
         return seShop;
     }
 

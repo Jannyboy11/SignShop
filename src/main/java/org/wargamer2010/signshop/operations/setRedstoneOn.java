@@ -5,7 +5,7 @@ import org.bukkit.block.BlockState;
 import org.bukkit.material.MaterialData;
 import org.bukkit.material.Lever;
 import org.bukkit.block.Block;
-import org.wargamer2010.signshop.util.signshopUtil;
+import org.wargamer2010.signshop.util.SignShopUtil;
 import org.wargamer2010.signshop.configuration.SignShopConfig;
 
 public class setRedstoneOn implements SignShopOperation {
@@ -61,7 +61,7 @@ public class setRedstoneOn implements SignShopOperation {
                     lever.setPowered(true);
                     state.setData(lever);
                     state.update();
-                    signshopUtil.generateInteractEvent(bLever, ssArgs.getPlayer().get().getPlayer(), ssArgs.getBlockFace().get());
+                    SignShopUtil.generateInteractEvent(bLever, ssArgs.getPlayer().get().getPlayer(), ssArgs.getBlockFace().get());
                 }
             }
         }

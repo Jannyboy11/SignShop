@@ -15,16 +15,16 @@ import org.wargamer2010.signshop.player.SignShopPlayer;
 public class DefaultMoneyTransaction implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onSSMoneyTransaction(SSMoneyTransactionEvent event) {
-        if(event.isHandled() || event.isCancelled())
+        if (event.isHandled() || event.isCancelled())
             return;
-        if(event.getPlayer().getPlayer() == null || !event.isBalanceOrExecution()) {
+        if (event.getPlayer() == null || event.getPlayer().getPlayer() == null || !event.isBalanceOrExecution()) {
             // Make ShopUpdater happy
             event.setHandled(true);
             return;
         }
 
         SignShopPlayer ssOwner = event.getShop().getOwner();
-        if(event.getRequestType() == SSMoneyRequestType.CheckBalance) {
+        if (event.getRequestType() == SSMoneyRequestType.CheckBalance) {
             switch(event.getTransactionType()) {
                 case GiveToOwner:
                     if(!ssOwner.canHaveMoney(event.getPrice())) {
@@ -56,7 +56,7 @@ public class DefaultMoneyTransaction implements Listener {
         } else {
             boolean bTransaction = false;
 
-            switch(event.getTransactionType()) {
+            switch (event.getTransactionType()) {
                 case GiveToOwner:
                     bTransaction = ssOwner.mutateMoney(event.getPrice());
                 break;
@@ -73,7 +73,7 @@ public class DefaultMoneyTransaction implements Listener {
                     return;
             }
 
-            if(!bTransaction) {
+            if (!bTransaction) {
                 event.getPlayer().sendMessage("The money transaction failed, please contact the System Administrator");
                 event.setCancelled(true);
             }

@@ -6,7 +6,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.wargamer2010.signshop.events.SSMoneyTransactionEvent;
 import org.wargamer2010.signshop.money.MoneyModifierManager;
-import org.wargamer2010.signshop.util.economyUtil;
+import org.wargamer2010.signshop.util.EconomyUtil;
 
 public class MoneyModifierListener implements Listener {
     @EventHandler(priority = EventPriority.LOW)
@@ -23,6 +23,6 @@ public class MoneyModifierListener implements Listener {
         }
 
         event.setPrice(returnValue);
-        event.setMessagePart("!price", economyUtil.formatMoney(returnValue));
+        event.setMessagePart("!price", EconomyUtil.formatMoney(returnValue));
     }
 }

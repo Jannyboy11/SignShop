@@ -32,10 +32,16 @@ public class RoundPriceModifier implements IMoneyModifier {
 
     @Override
     public double applyModifier(SignShopArguments ssArgs, SSMoneyEventType type) {
-        double newPrice = applyModifier(ssArgs.getPlayer().get(), ssArgs.getPrice().get(), ssArgs.getOperation().get(), type);
+        double newPrice;
+        if (ssArgs.hasPlayer()) {
+            newPrice = applyModifier(ssArgs.getPlayer().get(), ssArgs.getPrice().get(), ssArgs.getOperation().get(), type);
+        } else {
+            newPrice = applyModifier(null, ssArgs.getPrice().get(), ssArgs.getOperation().get(), type);
+        }
         ssArgs.getPrice().set(newPrice);
         return newPrice;
     }
+
 
     private static double roundToTwoDigits(double value, boolean roundDown) {
         if(value < 0.005)

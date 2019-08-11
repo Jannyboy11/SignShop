@@ -6,7 +6,7 @@ import org.bukkit.block.Block;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.block.Action;
 import org.bukkit.inventory.ItemStack;
-import org.wargamer2010.signshop.Seller;
+import org.wargamer2010.signshop.Shop;
 import org.wargamer2010.signshop.player.SignShopPlayer;
 
 public class SSPreTransactionEvent extends SSEvent implements IOperationEvent {
@@ -20,7 +20,7 @@ public class SSPreTransactionEvent extends SSEvent implements IOperationEvent {
     private SignShopPlayer ssOwner = null;
     private Block bSign = null;
     private String sOperation = "";
-    private Seller seShop = null;
+    private Shop seShop = null;
     private Action aAction = null;
     private boolean bRequirementsOK = true;
 
@@ -33,7 +33,7 @@ public class SSPreTransactionEvent extends SSEvent implements IOperationEvent {
                                 Block pSign,
                                 String pOperation,
                                 Map<String, String> pMessageParts,
-                                Seller pShop,
+                                Shop pShop,
                                 Action pAction,
                                 boolean pRequirementsOK) {
         super(pMessageParts);
@@ -92,7 +92,7 @@ public class SSPreTransactionEvent extends SSEvent implements IOperationEvent {
     }
 
     @Override
-    public Seller getShop() {
+    public Shop getShop() {
         return seShop;
     }
 

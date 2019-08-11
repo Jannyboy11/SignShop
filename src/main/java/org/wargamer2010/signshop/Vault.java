@@ -10,18 +10,20 @@ import org.bukkit.Server;
 import org.bukkit.entity.Player;
 
 public class Vault {
+    //TODO fix static abuse!
     private static Permission permission = null;
     private static Economy economy = null;
     private static Chat chat = null;
-    private static Boolean vaultFound = false;
+    private static boolean vaultFound = false;
     private static Server server = Bukkit.getServer();
     private static final String nullString = null;
 
     public Vault() {
-        if(server.getPluginManager().isPluginEnabled("Vault"))
+        if (server.getPluginManager().isPluginEnabled("Vault")) {
             vaultFound = true;
-        else
+        } else {
             SignShop.log("Vault plugin not enabled, SignShop can not run!", Level.SEVERE);
+        }
     }
 
     /**
@@ -48,7 +50,7 @@ public class Vault {
     /**
      * @return the vaultFound
      */
-    public static Boolean isVaultFound() {
+    public static boolean isVaultFound() {
         return vaultFound;
     }
 
@@ -60,7 +62,7 @@ public class Vault {
         }
     }
 
-    public Boolean setupPermissions()
+    public boolean setupPermissions()
     {
         if(!isVaultFound())
             return false;
@@ -71,7 +73,8 @@ public class Vault {
         return (getPermission() != null);
     }
 
-    public Boolean setupChat()
+    //TODO why do we need this?!
+    public boolean setupChat()
     {
         if(!isVaultFound())
             return false;
@@ -83,7 +86,7 @@ public class Vault {
         return (getChat() != null);
     }
 
-    public Boolean setupEconomy()
+    public boolean setupEconomy()
     {
         if(!isVaultFound())
             return false;

@@ -25,9 +25,9 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 import org.wargamer2010.signshop.configuration.ColorUtil;
 import org.wargamer2010.signshop.util.WebUtil;
-import org.wargamer2010.signshop.util.itemUtil;
-import static org.wargamer2010.signshop.util.itemUtil.enchantmentsToMessageFormat;
-import org.wargamer2010.signshop.util.signshopUtil;
+import org.wargamer2010.signshop.util.ItemUtil;
+import static org.wargamer2010.signshop.util.ItemUtil.enchantmentsToMessageFormat;
+import org.wargamer2010.signshop.util.SignShopUtil;
 
 public class SignShopItemMeta {
     private static final String listSeperator = "~";
@@ -63,7 +63,7 @@ public class SignShopItemMeta {
         }
 
         String[] arr = new String[temp.size()];
-        return signshopUtil.implode(temp.toArray(arr), ", ");
+        return SignShopUtil.implode(temp.toArray(arr), ", ");
     }
 
     public static ChatColor getTextColor() {
@@ -71,19 +71,18 @@ public class SignShopItemMeta {
     }
 
     private static String convertFireworkTypeToDisplay(FireworkEffect.Type type) {
-        String temp = signshopUtil.capFirstLetter(type.toString().toLowerCase()).replace("_", " ");
+        String temp = SignShopUtil.capFirstLetter(type.toString().toLowerCase()).replace("_", " ");
         if(temp.contains(" ")) {
             String[] temparr = temp.split(" ");
             String bak = temparr[0]; temparr[0] = temparr[1];
             temparr[1] = bak;
-            temp = signshopUtil.implode(temparr, " ");
+            temp = SignShopUtil.implode(temparr, " ");
         }
-        return signshopUtil.capFirstLetter(temp);
+        return SignShopUtil.capFirstLetter(temp);
     }
 
     private static boolean hasMeta(ItemStack stack) {
-        // This seems silly but some parts of the code below function when an item has no meta data but itemmeta is not null
-        return (stack.getItemMeta() != null);
+        return stack != null && stack.hasItemMeta();
     }
 
     private static String getDisplayName(ItemStack stack) {
@@ -98,7 +97,7 @@ public class SignShopItemMeta {
         if(Bukkit.getServer().getPluginManager().isPluginEnabled("WhatIsIt"))
         	nameFromWhatIsIt = WhatIsIt.itemName(stack);
         String itemName = nameFromWhatIsIt.isEmpty() || (nameFromWhatIsIt.compareTo("Unknown")) == 0 ? nameFromWeb : nameFromWhatIsIt;
-        String normal = itemName.isEmpty() ? itemUtil.formatData(stack.getData(), stack.getDurability()) : itemName;
+        String normal = itemName.isEmpty() ? ItemUtil.formatData(stack.getType()) : itemName; //used MaterialData, now just the Material.
         String displayname = "";
 
         if(stack.getItemMeta() != null) {
@@ -130,7 +129,7 @@ public class SignShopItemMeta {
             if(type == MetaType.EnchantmentStorage) {
                 EnchantmentStorageMeta enchantmeta = (EnchantmentStorageMeta) meta;
                 if(enchantmeta.hasStoredEnchants())
-                    return (getDisplayName(stack, ChatColor.DARK_PURPLE) + " " + itemUtil.enchantmentsToMessageFormat(enchantmeta.getStoredEnchants()));
+                    return (getDisplayName(stack, ChatColor.DARK_PURPLE) + " " + ItemUtil.enchantmentsToMessageFormat(enchantmeta.getStoredEnchants()));
             } else if(type == MetaType.LeatherArmor) {
                 LeatherArmorMeta leathermeta = (LeatherArmorMeta) meta;
                 return (ColorUtil.getColorAsString(leathermeta.getColor()) + " Colored " + getDisplayName(stack));
@@ -157,6 +156,7 @@ public class SignShopItemMeta {
                 Potion pot = null;
                 if(!potionmeta.hasCustomEffects()) {
                     try {
+                        //TODO replace using PotionEffect
                         pot = Potion.fromItemStack(stack);
                         effects = pot.getEffects();
                     } catch(IllegalArgumentException ex) {
@@ -189,10 +189,10 @@ public class SignShopItemMeta {
                     if(first) first = false;
                     else namebuilder.append(", ");
 
-                    namebuilder.append(signshopUtil.capFirstLetter(effect.getType().getName().toLowerCase()));
+                    namebuilder.append(SignShopUtil.capFirstLetter(effect.getType().getName().toLowerCase()));
                     if(pot != null && pot.getLevel() > 0) {
                         namebuilder.append(" ");
-                        namebuilder.append(itemUtil.binaryToRoman(pot.getLevel()));
+                        namebuilder.append(ItemUtil.binaryToRoman(pot.getLevel()));
                     } else {
                         namebuilder.append(" with");
                         namebuilder.append(" amplifier: ");
@@ -243,7 +243,7 @@ public class SignShopItemMeta {
     }
 
     public static void setMetaForID(ItemStack stack, Integer ID) {
-        Map<String, String> metamap = new LinkedHashMap<String, String>();
+        Map<String, String> metaMap = new LinkedHashMap<>();
         ItemMeta meta = stack.getItemMeta();
         SSDatabase db = new SSDatabase(filename);
 
@@ -256,26 +256,26 @@ public class SignShopItemMeta {
                 return;
             try {
                 while(setprops.next())
-                    metamap.put(setprops.getString("PropertyName"), setprops.getString("ProperyValue"));
+                    metaMap.put(setprops.getString("PropertyName"), setprops.getString("ProperyValue"));
             } catch(SQLException ex) {
                 return;
             }
 
-            if(metamap.isEmpty())
+            if(metaMap.isEmpty())
                 return;
         } finally {
             db.close();
         }
 
 
-        if(!getPropValue("displayname", metamap).isEmpty())
-            meta.setDisplayName(getPropValue("displayname", metamap));
-        if(!getPropValue("lore", metamap).isEmpty()) {
-            List<String> temp = Arrays.asList(getPropValue("lore", metamap).split(listSeperator));
+        if(!getPropValue("displayname", metaMap).isEmpty())
+            meta.setDisplayName(getPropValue("displayname", metaMap));
+        if(!getPropValue("lore", metaMap).isEmpty()) {
+            List<String> temp = Arrays.asList(getPropValue("lore", metaMap).split(listSeperator));
             meta.setLore(temp);
         }
-        if(!getPropValue("enchants", metamap).isEmpty()) {
-            for(Map.Entry<Enchantment, Integer> enchant : signshopUtil.convertStringToEnchantments(getPropValue("enchants", metamap)).entrySet()) {
+        if(!getPropValue("enchants", metaMap).isEmpty()) {
+            for(Map.Entry<Enchantment, Integer> enchant : SignShopUtil.convertStringToEnchantments(getPropValue("enchants", metaMap)).entrySet()) {
                 meta.addEnchant(enchant.getKey(), enchant.getValue(), true);
             }
         }
@@ -286,16 +286,16 @@ public class SignShopItemMeta {
             for(MetaType type : metatypes) {
                 if(type == MetaType.EnchantmentStorage) {
                     EnchantmentStorageMeta enchantmentmeta = (EnchantmentStorageMeta) meta;
-                    if(!getPropValue("storedenchants", metamap).isEmpty()) {
-                        for(Map.Entry<Enchantment, Integer> enchant : signshopUtil.convertStringToEnchantments(getPropValue("storedenchants", metamap)).entrySet()) {
+                    if(!getPropValue("storedenchants", metaMap).isEmpty()) {
+                        for(Map.Entry<Enchantment, Integer> enchant : SignShopUtil.convertStringToEnchantments(getPropValue("storedenchants", metaMap)).entrySet()) {
                             enchantmentmeta.addStoredEnchant(enchant.getKey(), enchant.getValue(), true);
                         }
                     }
                 }
                 else if(type == MetaType.LeatherArmor) {
                     LeatherArmorMeta leathermeta = (LeatherArmorMeta) meta;
-                    if(!getPropValue("color", metamap).isEmpty())
-                        leathermeta.setColor(Color.fromRGB(Integer.parseInt(getPropValue("color", metamap))));
+                    if(!getPropValue("color", metaMap).isEmpty())
+                        leathermeta.setColor(Color.fromRGB(Integer.parseInt(getPropValue("color", metaMap))));
                 }
                 else if(type == MetaType.Map) {
                     // We could set scaling here but for some reason Spigot doesn't when stacks are built up
@@ -303,23 +303,23 @@ public class SignShopItemMeta {
                 }
                 else if(type == MetaType.Repairable) {
                     Repairable repairmeta = (Repairable) meta;
-                    if(!getPropValue("repaircost", metamap).isEmpty())
-                        repairmeta.setRepairCost(Integer.parseInt(getPropValue("repaircost", metamap)));
+                    if(!getPropValue("repaircost", metaMap).isEmpty())
+                        repairmeta.setRepairCost(Integer.parseInt(getPropValue("repaircost", metaMap)));
                 }
                 else if(type == MetaType.Skull) {
                     SkullMeta skullmeta = (SkullMeta) meta;
-                    if(!getPropValue("owner", metamap).isEmpty())
-                        skullmeta.setOwner(getPropValue("owner", metamap));
+                    if(!getPropValue("owner", metaMap).isEmpty())
+                        skullmeta.setOwner(getPropValue("owner", metaMap));
                 } else if(type == MetaType.Potion) {
                     PotionMeta potionmeta = (PotionMeta) meta;
-                    List<PotionEffect> effects = convertStringToPotionMeta(getPropValue("potioneffects", metamap));
+                    List<PotionEffect> effects = convertStringToPotionMeta(getPropValue("potioneffects", metaMap));
                     for(PotionEffect effect : effects) {
                         potionmeta.addCustomEffect(effect, true);
                     }
                 } else if(type == MetaType.Fireworks) {
                     FireworkMeta fireworkmeta = (FireworkMeta) meta;
-                    fireworkmeta.addEffects(convertStringToFireworkEffects(getPropValue("fireworkeffects", metamap)));
-                    fireworkmeta.setPower(Integer.parseInt(getPropValue("fireworkpower", metamap)));
+                    fireworkmeta.addEffects(convertStringToFireworkEffects(getPropValue("fireworkeffects", metaMap)));
+                    fireworkmeta.setPower(Integer.parseInt(getPropValue("fireworkpower", metaMap)));
                 }
             }
         } catch(ClassCastException ex) {
@@ -384,7 +384,7 @@ public class SignShopItemMeta {
             if(set != null && set.next())
                 return set.getInt("ItemMetaID");
         } catch (SQLException ex) {
-
+            ex.printStackTrace();
         } finally {
             db.close();
         }
@@ -392,6 +392,12 @@ public class SignShopItemMeta {
         return -1;
     }
 
+    /**
+     * @deprecated use {@link org.bukkit.configuration.serialization.ConfigurationSerializable}
+     * @param meta
+     * @return
+     */
+    @Deprecated
     public static Map<String, String> getMetaAsMap(ItemMeta meta) {
         Map<String, String> metamap = new LinkedHashMap<String, String>();
         if(meta == null)
@@ -401,17 +407,17 @@ public class SignShopItemMeta {
         if(meta.getDisplayName() != null)
             metamap.put("displayname", meta.getDisplayName());
         if(meta.getEnchants() != null && !meta.getEnchants().isEmpty())
-            metamap.put("enchants", signshopUtil.convertEnchantmentsToString(meta.getEnchants()));
+            metamap.put("enchants", SignShopUtil.convertEnchantmentsToString(meta.getEnchants()));
         if(meta.getLore() != null && !meta.getLore().isEmpty()) {
             String lorearr[] = new String[meta.getLore().size()];
-            metamap.put("lore", signshopUtil.implode(meta.getLore().toArray(lorearr), listSeperator));
+            metamap.put("lore", SignShopUtil.implode(meta.getLore().toArray(lorearr), listSeperator));
         }
 
         for(MetaType type : types) {
             if(type == MetaType.EnchantmentStorage) {
                 EnchantmentStorageMeta enchantmentmeta = (EnchantmentStorageMeta) meta;
                 if(enchantmentmeta.hasStoredEnchants())
-                    metamap.put("storedenchants", signshopUtil.convertEnchantmentsToString(enchantmentmeta.getStoredEnchants()));
+                    metamap.put("storedenchants", SignShopUtil.convertEnchantmentsToString(enchantmentmeta.getStoredEnchants()));
             }
             else if(type == MetaType.LeatherArmor) {
                 LeatherArmorMeta leathermeta = (LeatherArmorMeta) meta;
@@ -451,8 +457,14 @@ public class SignShopItemMeta {
         return metamap;
     }
 
+    /**
+     * @deprecated not minecraft feature future-proof. Bukkit 1.15+ may add new subclasses of ItemMeta
+     * @param meta
+     * @return
+     */
+    @Deprecated
     private static List<MetaType> getTypesOfMeta(ItemMeta meta) {
-        List<MetaType> types = new LinkedList<MetaType>();
+        List<MetaType> types = new LinkedList<>();
 
         if(meta instanceof org.bukkit.inventory.meta.EnchantmentStorageMeta)
             types.add(MetaType.EnchantmentStorage);
@@ -468,15 +480,14 @@ public class SignShopItemMeta {
             types.add(MetaType.Potion);
         if(meta instanceof org.bukkit.inventory.meta.FireworkMeta)
             types.add(MetaType.Fireworks);
+        //TODO add more recent ItemMeta types
         return types;
     }
 
     private static String getPropValue(String name, Map<String, String> metamap) {
-        if(metamap.containsKey(name)) {
-            return metamap.get(name);
-        } else {
-            return "";
-        }
+        String value = metamap.get(name);
+        if (value == null) value = "";
+        return value;
     }
 
     private static String convertPotionMetaToString(PotionMeta meta) {
@@ -496,7 +507,6 @@ public class SignShopItemMeta {
         return returnbuilder.toString();
     }
 
-    @SuppressWarnings("deprecation") // Allowed for transition purposes
     private static List<PotionEffect> convertStringToPotionMeta(String meta) {
         List<PotionEffect> effects = new LinkedList<PotionEffect>();
         List<String> splitted = Arrays.asList(meta.split(listSeperator));
@@ -537,11 +547,11 @@ public class SignShopItemMeta {
             temp.add(Integer.toString(color.asRGB()));
         }
         String[] colorarr = new String[temp.size()];
-        return signshopUtil.implode(temp.toArray(colorarr), innerListSeperator);
+        return SignShopUtil.implode(temp.toArray(colorarr), innerListSeperator);
     }
 
     private static ImmutableList<Color> getColorsFromString(String colors) {
-        List<Color> temp = new LinkedList<Color>();
+        List<Color> temp = new LinkedList<>();
         List<String> split = Arrays.asList(colors.split(innerListSeperator));
         for(String part : split) {
             try {
@@ -554,6 +564,7 @@ public class SignShopItemMeta {
         return ImmutableList.copyOf(temp);
     }
 
+    @Deprecated
     private static String convertFireworkMetaToString(FireworkMeta meta) {
         if(!meta.hasEffects())
             return "";
@@ -574,8 +585,9 @@ public class SignShopItemMeta {
         return returnbuilder.toString();
     }
 
+    @Deprecated
     private static List<FireworkEffect> convertStringToFireworkEffects(String meta) {
-        List<FireworkEffect> effects = new LinkedList<FireworkEffect>();
+        List<FireworkEffect> effects = new LinkedList<>();
         List<String> splitted = Arrays.asList(meta.split(listSeperator));
         if(splitted.isEmpty())
             return effects;
@@ -594,12 +606,15 @@ public class SignShopItemMeta {
                     builder = (Boolean.parseBoolean(bits[4]) ? builder.withTrail() : builder);
 
                     effects.add(builder.build());
-                } catch(NumberFormatException ex) { }
+                } catch (NumberFormatException ex) {
+                    ex.printStackTrace();
+                }
             }
         }
         return effects;
     }
 
+    //TODO why do we need this anyway?
     private static enum MetaType {
         EnchantmentStorage,
         LeatherArmor,

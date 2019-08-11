@@ -8,7 +8,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.wargamer2010.signshop.SignShop;
 import org.wargamer2010.signshop.player.SignShopPlayer;
-import org.wargamer2010.signshop.util.signshopUtil;
+import org.wargamer2010.signshop.util.SignShopUtil;
 
 public class ReloadHandler implements ICommandHandler {
     private static ICommandHandler instance = new ReloadHandler();
@@ -23,7 +23,7 @@ public class ReloadHandler implements ICommandHandler {
 
     @Override
     public boolean handle(String command, String[] args, SignShopPlayer player) {
-        if(!signshopUtil.hasOPForCommand(player))
+        if(!SignShopUtil.hasOPForCommand(player))
             return true;
         PluginManager pm = Bukkit.getPluginManager();
 

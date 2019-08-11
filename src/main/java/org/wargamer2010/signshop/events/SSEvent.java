@@ -27,7 +27,7 @@ public abstract class SSEvent extends Event implements Cancellable {
 
     @Override
     public void setCancelled(boolean pCancelled) {
-        if(!bCanBeCancelled)
+        if (!bCanBeCancelled)
             return;
         bCancelled = pCancelled;
     }
@@ -48,10 +48,4 @@ public abstract class SSEvent extends Event implements Cancellable {
         messageParts.put(part, value);
     }
 
-    @Override
-    public abstract HandlerList getHandlers();
-
-    public static HandlerList getHandlerList() {
-        return null;
-    }
 }

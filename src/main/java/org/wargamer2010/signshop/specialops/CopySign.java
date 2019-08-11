@@ -6,7 +6,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.wargamer2010.signshop.Seller;
+import org.wargamer2010.signshop.Shop;
 import org.wargamer2010.signshop.SignShop;
 import org.wargamer2010.signshop.configuration.SignShopConfig;
 import org.wargamer2010.signshop.configuration.Storage;
@@ -16,9 +16,9 @@ import org.wargamer2010.signshop.operations.SignShopArguments;
 import org.wargamer2010.signshop.operations.SignShopArgumentsType;
 import org.wargamer2010.signshop.operations.SignShopOperationListItem;
 import org.wargamer2010.signshop.player.SignShopPlayer;
-import org.wargamer2010.signshop.util.economyUtil;
-import org.wargamer2010.signshop.util.itemUtil;
-import org.wargamer2010.signshop.util.signshopUtil;
+import org.wargamer2010.signshop.util.EconomyUtil;
+import org.wargamer2010.signshop.util.ItemUtil;
+import org.wargamer2010.signshop.util.SignShopUtil;
 
 public class CopySign implements SignShopSpecialOp {
     @Override
@@ -26,28 +26,28 @@ public class CopySign implements SignShopSpecialOp {
         Player player = event.getPlayer();
         Block shopSign = event.getClickedBlock();
         SignShopPlayer ssPlayer = new SignShopPlayer(player);
-        if(!itemUtil.clickedSign(shopSign))
+        if(!ItemUtil.isSign(shopSign))
             return false;
         if(ssPlayer.getItemInHand().getType() != SignShopConfig.getUpdateMaterial())
             return false;
 
         Sign signNewSign = null;
         for(Block tempBlock : clickedBlocks) {
-            if(itemUtil.clickedSign(tempBlock)) {
+            if(ItemUtil.isSign(tempBlock)) {
                 signNewSign = ((Sign) tempBlock.getState());
                 break;
             }
         }
-        if(signNewSign == null || Storage.get().getSeller(signNewSign.getLocation()) != null)
+        if(signNewSign == null || Storage.get().getShop(signNewSign.getLocation()) != null)
             return false;
 
         Sign signToChange = ((Sign) shopSign.getState());
         String[] sNewSign = signNewSign.getLines();
         String[] sToChange = signToChange.getLines().clone();
-        Seller seller = Storage.get().getSeller(shopSign.getLocation());
-        if(seller == null)
+        Shop shop = Storage.get().getShop(shopSign.getLocation());
+        if(shop == null)
             return false;
-        if((!seller.isOwner(ssPlayer) || !ssPlayer.hasPerm("SignShop.CopyPaste", true)) && !ssPlayer.hasPerm("SignShop.CopyPaste.Others", true)) {
+        if((!shop.isOwner(ssPlayer) || !ssPlayer.hasPerm("SignShop.CopyPaste", true)) && !ssPlayer.hasPerm("SignShop.CopyPaste.Others", true)) {
             ssPlayer.sendMessage(SignShopConfig.getError("no_permission", null));
             return true;
         }
@@ -67,9 +67,9 @@ public class CopySign implements SignShopSpecialOp {
 
         String sOperation;
         if(sNewSign[0] != null && sNewSign[0].length() > 0)
-            sOperation = signshopUtil.getOperation(sNewSign[0]);
+            sOperation = SignShopUtil.getOperation(sNewSign[0]);
         else
-            sOperation = signshopUtil.getOperation(sToChange[0]);
+            sOperation = SignShopUtil.getOperation(sToChange[0]);
 
         if(!SignShopConfig.getBlocks(sOperation).isEmpty()) {
             List<String> operation = SignShopConfig.getBlocks(sOperation);
@@ -77,13 +77,13 @@ public class CopySign implements SignShopSpecialOp {
                 ssPlayer.sendMessage(SignShopConfig.getError("no_permission", null));
                 return true;
             }
-            List<SignShopOperationListItem> SignShopOperations = signshopUtil.getSignShopOps(operation);
+            List<SignShopOperationListItem> SignShopOperations = SignShopUtil.getSignShopOps(operation);
             if(SignShopOperations == null) {
                 ssPlayer.sendMessage("The new operation does not exist!");
                 revert(shopSign, sToChange);
                 return true;
             }
-            SignShopArguments ssArgs = new SignShopArguments(economyUtil.parsePrice(price), seller.getItems(), seller.getContainables(), seller.getActivatables(),
+            SignShopArguments ssArgs = new SignShopArguments(EconomyUtil.parsePrice(price), shop.getItems(), shop.getContainables(), shop.getActivatables(),
                     ssPlayer, ssPlayer, shopSign, sOperation, event.getBlockFace(), event.getAction(), SignShopArgumentsType.Setup);
 
             Boolean bSetupOK = false;
@@ -100,14 +100,14 @@ public class CopySign implements SignShopSpecialOp {
                 return true;
             }
 
-            if(!signshopUtil.getPriceFromMoneyEvent(ssArgs)) {
+            if(!SignShopUtil.getPriceFromMoneyEvent(ssArgs)) {
                 ssPlayer.sendMessage("The new and old operation are not compatible.");
                 revert(shopSign, sToChange);
                 return true;
             }
 
             SSCreatedEvent createdevent = SSEventFactory.generateCreatedEvent(ssArgs);
-            SignShop.scheduleEvent(createdevent);
+            SignShop.callEvent(createdevent);
             if(createdevent.isCancelled()) {
                 ssPlayer.sendMessage("The new and old operation are not compatible.");
                 revert(shopSign, sToChange);
@@ -125,7 +125,7 @@ public class CopySign implements SignShopSpecialOp {
             return true;
         }
 
-        itemUtil.setSignStatus(shopSign, ChatColor.DARK_BLUE);
+        ItemUtil.setSignStatus(shopSign, ChatColor.DARK_BLUE);
 
         ssPlayer.sendMessage(SignShopConfig.getError("updated_shop", null));
         return true;

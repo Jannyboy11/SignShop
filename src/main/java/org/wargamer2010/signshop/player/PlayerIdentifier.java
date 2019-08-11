@@ -1,86 +1,120 @@
 
 package org.wargamer2010.signshop.player;
 
-import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
+
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.entity.Player;
 
-public class PlayerIdentifier {
-    private static boolean didMethodLookup = false;
-    private static boolean uuidSupport = false;
+@SerializableAs("PlayerId")
+public class PlayerIdentifier implements ConfigurationSerializable {
     private UUID id = null;
     private String name = null;
 
-    public PlayerIdentifier(Player player) {
-        if(player != null) {
-            if(GetUUIDSupport())
-                id = player.getUniqueId();
-            name = player.getName();
-        }
+    public PlayerIdentifier(OfflinePlayer player) {
+        this(player.getUniqueId(), player.getName());
     }
 
+    public PlayerIdentifier(UUID uuid, String username) {
+        if (uuid == null && username == null) {
+            throw new NullPointerException("uuid and username can't both be null");
+        }
+
+        this.id = uuid;
+        this.name = username;
+    }
+
+    @Deprecated
     public PlayerIdentifier(UUID pId) {
-        if(pId != null) {
-            id = pId;
-            name = getName();
-        }
+        this.id = Objects.requireNonNull(pId);
     }
 
+    @Deprecated
     public PlayerIdentifier(String pName) {
         name = pName;
-        if(GetUUIDSupport()) {
-            OfflinePlayer offplayer = getOfflinePlayer();
-            if(offplayer != null)
-                id = offplayer.getUniqueId();
+
+        OfflinePlayer offplayer = getOfflinePlayer();
+        if (offplayer != null) {
+            id = offplayer.getUniqueId();
         }
     }
 
-    public String getStringIdentifier() {
-        if(GetUUIDSupport()) {
-            return id.toString();
-        } else {
-            return name;
-        }
+    @Override
+    public Map<String, Object> serialize() {
+        Map<String, Object> map = new HashMap<>();
+        if (id != null) map.put("uuid", id.toString());
+        if (name != null) map.put("username", name);
+        return map;
     }
 
-    @SuppressWarnings("deprecation") // Backwards compatibility
+    public static PlayerIdentifier valueOf(Map<String, Object> map) {
+        String name = (String) map.get("username");
+        String uuid = (String) map.get("uuid");
+
+        UUID id = uuid == null ? null : UUID.fromString(uuid);
+        return new PlayerIdentifier(id, name);
+    }
+
     public Player getPlayer() {
-        if(GetUUIDSupport()) {
-            return id == null ? null : Bukkit.getPlayer(id);
-        } else {
-            return Bukkit.getPlayer(name);
+        Player player = Bukkit.getPlayer(id);
+        if (player == null) player = Bukkit.getPlayerExact(name);
+
+        if (player != null) {
+            this.id = player.getUniqueId();
+            this.name = player.getName();
+            return player;
         }
+
+        return null;
     }
 
-    @SuppressWarnings("deprecation") // Backwards compatibility
+    @Deprecated
     public final OfflinePlayer getOfflinePlayer() {
-        if(GetUUIDSupport()) {
-            return id == null ? null : Bukkit.getOfflinePlayer(id);
-        } else {
-            return Bukkit.getOfflinePlayer(name);
+        OfflinePlayer player = getPlayer();
+        if (player != null) {
+            return player;
+        } else if (id != null) {
+            player = Bukkit.getOfflinePlayer(id);
+            if (!player.getName().equals(id.toString())) {
+                this.name = player.getName();
+            }
+        } else if (name != null) {
+            player = Bukkit.getOfflinePlayer(name);
+            this.id = player.getUniqueId();
         }
+
+        return player;
     }
 
     public final String getName() {
-        OfflinePlayer offplayer = getOfflinePlayer();
-        if(offplayer != null)
-            return offplayer.getName();
+        if (name != null && !name.isEmpty()) return name;
 
-        return name;
+        OfflinePlayer offlinePlayer = getOfflinePlayer(); //if found, already sets the name field
+        if (offlinePlayer != null) return offlinePlayer.getName();
+
+        return null;
     }
 
+    /**
+     * @deprecated sets either the SignShopPlayer's UUID or Username, not both
+     * @param string the player's UUID or Username
+     * @return
+     */
+    //TODO move this to SignShopPlayer.java?
     public static SignShopPlayer getPlayerFromString(String string) {
-        if(string == null || string.isEmpty())
+        if (string == null || string.isEmpty())
             return null;
 
-        if(GetUUIDSupport()) {
-            try {
-                return new SignShopPlayer(new PlayerIdentifier(UUID.fromString(string)));
-            } catch(IllegalArgumentException ex) {
-                // Legacy mode, name will be converted to UUID on next Save
-            }
+        try {
+            return new SignShopPlayer(new PlayerIdentifier(UUID.fromString(string)));
+        } catch(IllegalArgumentException ex) {
+            //string was not a uuid, just continue and try by name
         }
 
         return getByName(string);
@@ -94,62 +128,55 @@ public class PlayerIdentifier {
      *
      * @param name Player name
      * @return SignShopPlayer instance
+     * @deprecated uses {@link Bukkit#getOfflinePlayer(String)}
      */
-    @SuppressWarnings("deprecation") // Backwards compatibility
+    @Deprecated
     public static SignShopPlayer getByName(String name) {
         if(name == null || name.isEmpty())
             return null;
 
         OfflinePlayer player = Bukkit.getOfflinePlayer(name);
-        PlayerIdentifier id = null;
-
-        if(player != null && player.getFirstPlayed() != 0)
-            id = new PlayerIdentifier(player.getUniqueId());
+        PlayerIdentifier id = new PlayerIdentifier(player);
 
         return new SignShopPlayer(id);
     }
 
-    public static synchronized boolean GetUUIDSupport() {
-        if(didMethodLookup)
-            return uuidSupport;
-        for(Method method : OfflinePlayer.class.getMethods()) {
-            if(method.getName().equalsIgnoreCase("getUniqueId"))
-                uuidSupport = true;
-        }
-        didMethodLookup = true;
-        return uuidSupport;
-    }
-
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 79 * hash + (this.id != null ? this.id.hashCode() : 0);
-        hash = 79 * hash + (this.name != null ? this.name.hashCode() : 0);
-        return hash;
+        if (this.id == null) {
+            this.id = getOfflinePlayer().getUniqueId();
+        }
+
+        return Objects.hash(this.id);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
+        if (obj == null) return false;
+        if (!(obj instanceof PlayerIdentifier)) return false;
+
         final PlayerIdentifier other = (PlayerIdentifier) obj;
-        if(other.getOfflinePlayer() == null)
-            return getOfflinePlayer() == null;
-        if(getOfflinePlayer() == null)
-            return false;
-        if(GetUUIDSupport())
-            return other.getOfflinePlayer().getUniqueId().equals(getOfflinePlayer().getUniqueId());
-        return other.getOfflinePlayer().getName().equals(getOfflinePlayer().getName());
+        if (other.id != null && this.id != null) return this.id.equals(other.id);
+
+        if (other.id == null && this.id == null) {
+            if (Objects.equals(this.name, other.name)) {
+                return true;
+            }
+        }
+
+        //hopefully we don't get here.
+        OfflinePlayer myOfflinePlayer = getOfflinePlayer();
+        OfflinePlayer otherOfflinePlayer = other.getOfflinePlayer();
+        if (otherOfflinePlayer == null) {
+            return myOfflinePlayer == null;
+        } else {
+            return myOfflinePlayer != null && otherOfflinePlayer.getUniqueId().equals(myOfflinePlayer.getUniqueId());
+        }
     }
 
     @Override
     public String toString() {
-        if(GetUUIDSupport())
             return id == null ? name : id.toString();
-        return name;
     }
+
 }

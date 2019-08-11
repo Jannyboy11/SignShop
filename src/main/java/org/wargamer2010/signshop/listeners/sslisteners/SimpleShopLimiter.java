@@ -9,8 +9,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.wargamer2010.signshop.configuration.SignShopConfig;
 import org.wargamer2010.signshop.events.SSCreatedEvent;
-import org.wargamer2010.signshop.util.itemUtil;
-import org.wargamer2010.signshop.util.signshopUtil;
+import org.wargamer2010.signshop.util.ItemUtil;
+import org.wargamer2010.signshop.util.SignShopUtil;
 
 public class SimpleShopLimiter implements Listener {
 
@@ -21,7 +21,7 @@ public class SimpleShopLimiter implements Listener {
         int iLimit = event.getPlayer().reachedMaxShops();
         if(!SignShopConfig.getBlocks(event.getOperation()).contains("playerIsOp") && iLimit > 0) {
             event.getPlayer().sendMessage(SignShopConfig.getError("too_many_shops", null).replace("!max", Integer.toString(iLimit)));
-            itemUtil.setSignStatus(event.getSign(), ChatColor.BLACK);
+            ItemUtil.setSignStatus(event.getSign(), ChatColor.BLACK);
             event.setCancelled(true);
             return;
         }
@@ -31,7 +31,7 @@ public class SimpleShopLimiter implements Listener {
 
         for(Block bCheckme : event.getContainables()) {
             if(event.getSign().getWorld().getName().equals(bCheckme.getWorld().getName())) {
-               if(!signshopUtil.checkDistance(bClicked, bCheckme, SignShopConfig.getMaxSellDistance()) && !operation.contains("playerIsOp")) {
+               if(!SignShopUtil.checkDistance(bClicked, bCheckme, SignShopConfig.getMaxSellDistance()) && !operation.contains("playerIsOp")) {
                    event.setMessagePart("!max", Integer.toString(SignShopConfig.getMaxSellDistance()));
                    event.getPlayer().sendMessage(SignShopConfig.getError("too_far", event.getMessageParts()));
                    event.setCancelled(true);

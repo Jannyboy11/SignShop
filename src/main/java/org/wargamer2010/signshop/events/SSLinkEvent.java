@@ -2,17 +2,17 @@ package org.wargamer2010.signshop.events;
 
 import org.bukkit.block.Block;
 import org.bukkit.event.HandlerList;
-import org.wargamer2010.signshop.Seller;
+import org.wargamer2010.signshop.Shop;
 import org.wargamer2010.signshop.player.SignShopPlayer;
 
 public class SSLinkEvent extends SSEvent {
     private static final HandlerList handlers = new HandlerList();
 
-    private SignShopPlayer ssPlayer = null;
-    private Block bBlock = null;
-    private Seller seShop = null;
+    private final SignShopPlayer ssPlayer;
+    private final Block bBlock;
+    private final Shop seShop;
 
-    public SSLinkEvent(Block pBlock, SignShopPlayer pPlayer, Seller pShop) {
+    public SSLinkEvent(Block pBlock, SignShopPlayer pPlayer, Shop pShop) {
         ssPlayer = pPlayer;
         bBlock = pBlock;
         seShop = pShop;
@@ -35,7 +35,7 @@ public class SSLinkEvent extends SSEvent {
         return bBlock;
     }
 
-    public Seller getShop() {
+    public Shop getShop() {
         return seShop;
     }
 }

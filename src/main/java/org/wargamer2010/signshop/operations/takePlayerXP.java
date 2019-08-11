@@ -1,14 +1,14 @@
 package org.wargamer2010.signshop.operations;
 
 import org.wargamer2010.essentials.SetExpFix;
-import org.wargamer2010.signshop.util.signshopUtil;
+import org.wargamer2010.signshop.util.SignShopUtil;
 
 public class takePlayerXP implements SignShopOperation {
 
 
     @Override
     public Boolean setupOperation(SignShopArguments ssArgs) {
-        Double XP = signshopUtil.getNumberFromThirdLine(ssArgs.getSign().get());
+        Double XP = SignShopUtil.getNumberFromThirdLine(ssArgs.getSign().get());
         if(XP == 0.0) {
             ssArgs.getPlayer().get().sendMessage("Please put the amount of XP you'd like players to Buy on the third line!");
             return false;
@@ -21,7 +21,7 @@ public class takePlayerXP implements SignShopOperation {
     public Boolean checkRequirements(SignShopArguments ssArgs, Boolean activeCheck) {
         if(!ssArgs.isPlayerOnline())
             return true;
-        Double XP = signshopUtil.getNumberFromThirdLine(ssArgs.getSign().get());
+        Double XP = SignShopUtil.getNumberFromThirdLine(ssArgs.getSign().get());
         if(XP == 0.0) {
             ssArgs.getPlayer().get().sendMessage("Invalid amount of XP on the third line!");
             return false;
@@ -42,7 +42,7 @@ public class takePlayerXP implements SignShopOperation {
 
     @Override
     public Boolean runOperation(SignShopArguments ssArgs) {
-        Double XP = signshopUtil.getNumberFromThirdLine(ssArgs.getSign().get());
+        Double XP = SignShopUtil.getNumberFromThirdLine(ssArgs.getSign().get());
         Integer setAmount;
 
         if(ssArgs.isOperationParameter("raw")) {
