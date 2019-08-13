@@ -96,6 +96,9 @@ public class ShopUpdater implements Listener {
         Sign sign = (Sign) shop.getSign().getState();
         String firstLine = sign.getLine(0);
         List<SignShopOperationListItem> operations = SignShopUtil.getSignShopOps(Arrays.asList(firstLine));
+        //TODO debug operations
+
+        if (operations == null) return;
 
         BuySell buySell = BuySell.UNKNOWN;
 
