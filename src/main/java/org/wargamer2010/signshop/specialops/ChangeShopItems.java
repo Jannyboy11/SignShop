@@ -22,16 +22,16 @@ public class ChangeShopItems implements SignShopSpecialOp {
 
     @Override
     public Boolean runOperation(List<Block> clickedBlocks, PlayerInteractEvent event, Boolean ranSomething) {
-        if(ranSomething)
+        if (ranSomething)
             return false;
         Player player = event.getPlayer();
         SignShopPlayer ssPlayer = new SignShopPlayer(player);
         Block bClicked = event.getClickedBlock();
         Shop shop = Storage.get().getShop(bClicked.getLocation());
         String sOperation = SignShopUtil.getOperation(((Sign) bClicked.getState()).getLine(0));
-        if(shop == null)
+        if (shop == null)
             return false;
-        if(ssPlayer.getItemInHand() == null || ssPlayer.getItemInHand().getType() != SignShopConfig.getUpdateMaterial())
+        if (!ssPlayer.hasItemInHand(SignShopConfig.getUpdateMaterial()))
             return false;
         SignShopPlayer ssOwner = shop.getOwner();
         List<String> operation = SignShopConfig.getBlocks(sOperation);
@@ -42,8 +42,8 @@ public class ChangeShopItems implements SignShopSpecialOp {
             return true;
         }
 
-        List<Block> containables = new LinkedList<Block>();
-        List<Block> activatables = new LinkedList<Block>();
+        List<Block> containables = new LinkedList<>();
+        List<Block> activatables = new LinkedList<>();
         Boolean wentOK = SignShopUtil.getSignshopBlocksFromList(ssPlayer, containables, activatables, event.getClickedBlock());
         if (!wentOK)
             return false;

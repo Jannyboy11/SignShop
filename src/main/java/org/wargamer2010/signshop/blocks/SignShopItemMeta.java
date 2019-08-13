@@ -125,15 +125,15 @@ public class SignShopItemMeta {
         ItemMeta meta = stack.getItemMeta();
 
         List<MetaType> metatypes = getTypesOfMeta(meta);
-        for(MetaType type : metatypes) {
-            if(type == MetaType.EnchantmentStorage) {
+        for (MetaType type : metatypes) {
+            if (type == MetaType.EnchantmentStorage) {
                 EnchantmentStorageMeta enchantmeta = (EnchantmentStorageMeta) meta;
-                if(enchantmeta.hasStoredEnchants())
+                if (enchantmeta.hasStoredEnchants())
                     return (getDisplayName(stack, ChatColor.DARK_PURPLE) + " " + ItemUtil.enchantmentsToMessageFormat(enchantmeta.getStoredEnchants()));
-            } else if(type == MetaType.LeatherArmor) {
+            } else if (type == MetaType.LeatherArmor) {
                 LeatherArmorMeta leathermeta = (LeatherArmorMeta) meta;
                 return (ColorUtil.getColorAsString(leathermeta.getColor()) + " Colored " + getDisplayName(stack));
-            } else if(type == MetaType.Skull) {
+            } else if (type == MetaType.Skull) {
                 String postfix = "'s Head";
                 SkullMeta skullmeta = (SkullMeta) meta;
                 if(skullmeta.getOwner() != null) {
@@ -145,7 +145,7 @@ public class SignShopItemMeta {
                     // So we'll have to rely on the web lookup, if the server owner has it enabled
                     return getDisplayName(stack);
                 }
-            } else if(type == MetaType.Potion) {
+            } else if (type == MetaType.Potion) {
                 PotionMeta potionmeta = (PotionMeta) meta;
 
                 boolean first = true;
@@ -154,7 +154,7 @@ public class SignShopItemMeta {
 
                 Collection<PotionEffect> effects = null;
                 Potion pot = null;
-                if(!potionmeta.hasCustomEffects()) {
+                if (!potionmeta.hasCustomEffects()) {
                     try {
                         //TODO replace using PotionEffect
                         pot = Potion.fromItemStack(stack);
@@ -175,7 +175,7 @@ public class SignShopItemMeta {
                             }
                             stack.setDurability(damage);
                         }
-                        if(effects == null) {
+                        if (effects == null) {
                             pot = new Potion(PotionType.WATER);
                             effects = pot.getEffects();
                         }
@@ -185,12 +185,12 @@ public class SignShopItemMeta {
 
                 namebuilder.append(" (");
 
-                for(PotionEffect effect : effects) {
-                    if(first) first = false;
+                for (PotionEffect effect : effects) {
+                    if (first) first = false;
                     else namebuilder.append(", ");
 
                     namebuilder.append(SignShopUtil.capFirstLetter(effect.getType().getName().toLowerCase()));
-                    if(pot != null && pot.getLevel() > 0) {
+                    if (pot != null && pot.getLevel() > 0) {
                         namebuilder.append(" ");
                         namebuilder.append(ItemUtil.binaryToRoman(pot.getLevel()));
                     } else {
@@ -198,7 +198,7 @@ public class SignShopItemMeta {
                         namebuilder.append(" amplifier: ");
                         namebuilder.append(effect.getAmplifier());
                     }
-                    if(effect.getDuration() > 1) {
+                    if (effect.getDuration() > 1) {
                         namebuilder.append(" and duration: ");
                         namebuilder.append(effect.getDuration());
                     }
@@ -207,17 +207,17 @@ public class SignShopItemMeta {
                 namebuilder.append(")");
 
                 return namebuilder.toString();
-            } else if(type == MetaType.Fireworks) {
+            } else if (type == MetaType.Fireworks) {
                 FireworkMeta fireworkmeta = (FireworkMeta) meta;
 
                 StringBuilder namebuilder = new StringBuilder(256);
                 namebuilder.append(getDisplayName(stack, ChatColor.DARK_PURPLE));
 
-                if(fireworkmeta.hasEffects()) {
+                if (fireworkmeta.hasEffects()) {
                     namebuilder.append(" (");
                     namebuilder.append("Duration : ");
                     namebuilder.append(fireworkmeta.getPower());
-                    for(FireworkEffect effect : fireworkmeta.getEffects()) {
+                    for (FireworkEffect effect : fireworkmeta.getEffects()) {
                         namebuilder.append(", ");
 
                         namebuilder.append(convertFireworkTypeToDisplay(effect.getType()));
@@ -237,45 +237,52 @@ public class SignShopItemMeta {
             }
         }
 
-        if(stack.getItemMeta().hasDisplayName())
+        if (stack.getItemMeta().hasDisplayName())
             return getDisplayName(stack);
         return getDisplayName(stack);
     }
 
+    /**
+     * Updates the meta in the sqlite database
+     * @deprecated replaced by {@link BukkitSerialization}
+     * @param stack the itemstack from which the meta is taken
+     * @param ID the id of the meta in the database
+     */
+    @Deprecated
     public static void setMetaForID(ItemStack stack, Integer ID) {
         Map<String, String> metaMap = new LinkedHashMap<>();
         ItemMeta meta = stack.getItemMeta();
         SSDatabase db = new SSDatabase(filename);
 
         try {
-            Map<Integer, Object> pars = new LinkedHashMap<Integer, Object>();
+            Map<Integer, Object> pars = new LinkedHashMap<>();
             pars.put(1, ID);
 
             ResultSet setprops = (ResultSet)db.runStatement("SELECT PropertyName, ProperyValue FROM MetaProperty WHERE ItemMetaID = ?;", pars, true);
-            if(setprops == null)
+            if (setprops == null)
                 return;
             try {
-                while(setprops.next())
+                while (setprops.next())
                     metaMap.put(setprops.getString("PropertyName"), setprops.getString("ProperyValue"));
-            } catch(SQLException ex) {
+            } catch (SQLException ex) {
                 return;
             }
 
-            if(metaMap.isEmpty())
+            if (metaMap.isEmpty())
                 return;
         } finally {
             db.close();
         }
 
 
-        if(!getPropValue("displayname", metaMap).isEmpty())
+        if (!getPropValue("displayname", metaMap).isEmpty())
             meta.setDisplayName(getPropValue("displayname", metaMap));
-        if(!getPropValue("lore", metaMap).isEmpty()) {
+        if (!getPropValue("lore", metaMap).isEmpty()) {
             List<String> temp = Arrays.asList(getPropValue("lore", metaMap).split(listSeperator));
             meta.setLore(temp);
         }
-        if(!getPropValue("enchants", metaMap).isEmpty()) {
-            for(Map.Entry<Enchantment, Integer> enchant : SignShopUtil.convertStringToEnchantments(getPropValue("enchants", metaMap)).entrySet()) {
+        if (!getPropValue("enchants", metaMap).isEmpty()) {
+            for (Map.Entry<Enchantment, Integer> enchant : SignShopUtil.convertStringToEnchantments(getPropValue("enchants", metaMap)).entrySet()) {
                 meta.addEnchant(enchant.getKey(), enchant.getValue(), true);
             }
         }
@@ -283,51 +290,50 @@ public class SignShopItemMeta {
         List<MetaType> metatypes = getTypesOfMeta(meta);
 
         try {
-            for(MetaType type : metatypes) {
-                if(type == MetaType.EnchantmentStorage) {
+            for (MetaType type : metatypes) {
+                if (type == MetaType.EnchantmentStorage) {
                     EnchantmentStorageMeta enchantmentmeta = (EnchantmentStorageMeta) meta;
-                    if(!getPropValue("storedenchants", metaMap).isEmpty()) {
-                        for(Map.Entry<Enchantment, Integer> enchant : SignShopUtil.convertStringToEnchantments(getPropValue("storedenchants", metaMap)).entrySet()) {
+                    if (!getPropValue("storedenchants", metaMap).isEmpty()) {
+                        for (Map.Entry<Enchantment, Integer> enchant : SignShopUtil.convertStringToEnchantments(getPropValue("storedenchants", metaMap)).entrySet()) {
                             enchantmentmeta.addStoredEnchant(enchant.getKey(), enchant.getValue(), true);
                         }
                     }
                 }
-                else if(type == MetaType.LeatherArmor) {
+                else if (type == MetaType.LeatherArmor) {
                     LeatherArmorMeta leathermeta = (LeatherArmorMeta) meta;
                     if(!getPropValue("color", metaMap).isEmpty())
                         leathermeta.setColor(Color.fromRGB(Integer.parseInt(getPropValue("color", metaMap))));
                 }
-                else if(type == MetaType.Map) {
+                else if (type == MetaType.Map) {
                     // We could set scaling here but for some reason Spigot doesn't when stacks are built up
                     // Which results in items not matching anymore if we do, so we won't
                 }
-                else if(type == MetaType.Repairable) {
+                else if (type == MetaType.Repairable) {
                     Repairable repairmeta = (Repairable) meta;
-                    if(!getPropValue("repaircost", metaMap).isEmpty())
+                    if (!getPropValue("repaircost", metaMap).isEmpty())
                         repairmeta.setRepairCost(Integer.parseInt(getPropValue("repaircost", metaMap)));
                 }
-                else if(type == MetaType.Skull) {
+                else if (type == MetaType.Skull) {
                     SkullMeta skullmeta = (SkullMeta) meta;
-                    if(!getPropValue("owner", metaMap).isEmpty())
+                    if (!getPropValue("owner", metaMap).isEmpty())
                         skullmeta.setOwner(getPropValue("owner", metaMap));
-                } else if(type == MetaType.Potion) {
+                } else if (type == MetaType.Potion) {
                     PotionMeta potionmeta = (PotionMeta) meta;
                     List<PotionEffect> effects = convertStringToPotionMeta(getPropValue("potioneffects", metaMap));
-                    for(PotionEffect effect : effects) {
+                    for (PotionEffect effect : effects) {
                         potionmeta.addCustomEffect(effect, true);
                     }
-                } else if(type == MetaType.Fireworks) {
+                } else if (type == MetaType.Fireworks) {
                     FireworkMeta fireworkmeta = (FireworkMeta) meta;
                     fireworkmeta.addEffects(convertStringToFireworkEffects(getPropValue("fireworkeffects", metaMap)));
                     fireworkmeta.setPower(Integer.parseInt(getPropValue("fireworkpower", metaMap)));
-                }
+                } //TODO we could sitch on other meta types too but this method isn't used anymore so I don't care
             }
-        } catch(ClassCastException ex) {
+        } catch (ClassCastException ex) {
 
-        } catch(NumberFormatException ex) {
+        } catch (NumberFormatException ex) {
 
         }
-
 
         stack.setItemMeta(meta);
     }

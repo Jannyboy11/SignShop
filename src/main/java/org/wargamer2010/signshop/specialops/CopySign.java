@@ -21,64 +21,65 @@ import org.wargamer2010.signshop.util.ItemUtil;
 import org.wargamer2010.signshop.util.SignShopUtil;
 
 public class CopySign implements SignShopSpecialOp {
+
     @Override
     public Boolean runOperation(List<Block> clickedBlocks, PlayerInteractEvent event, Boolean ranSomething) {
         Player player = event.getPlayer();
         Block shopSign = event.getClickedBlock();
         SignShopPlayer ssPlayer = new SignShopPlayer(player);
-        if(!ItemUtil.isSign(shopSign))
+        if (!ItemUtil.isSign(shopSign))
             return false;
-        if(ssPlayer.getItemInHand().getType() != SignShopConfig.getUpdateMaterial())
+        if (!ssPlayer.hasItemInHand(SignShopConfig.getUpdateMaterial()))
             return false;
 
         Sign signNewSign = null;
-        for(Block tempBlock : clickedBlocks) {
+        for (Block tempBlock : clickedBlocks) {
             if(ItemUtil.isSign(tempBlock)) {
                 signNewSign = ((Sign) tempBlock.getState());
                 break;
             }
         }
-        if(signNewSign == null || Storage.get().getShop(signNewSign.getLocation()) != null)
+        if (signNewSign == null || Storage.get().getShop(signNewSign.getLocation()) != null)
             return false;
 
         Sign signToChange = ((Sign) shopSign.getState());
         String[] sNewSign = signNewSign.getLines();
         String[] sToChange = signToChange.getLines().clone();
         Shop shop = Storage.get().getShop(shopSign.getLocation());
-        if(shop == null)
+        if (shop == null)
             return false;
-        if((!shop.isOwner(ssPlayer) || !ssPlayer.hasPerm("SignShop.CopyPaste", true)) && !ssPlayer.hasPerm("SignShop.CopyPaste.Others", true)) {
+        if ((!shop.isOwner(ssPlayer) || !ssPlayer.hasPerm("SignShop.CopyPaste", true)) && !ssPlayer.hasPerm("SignShop.CopyPaste.Others", true)) {
             ssPlayer.sendMessage(SignShopConfig.getError("no_permission", null));
             return true;
         }
 
-        if(sNewSign[1] != null && sNewSign[1].length() > 0)
+        if (sNewSign[1] != null && sNewSign[1].length() > 0)
             signToChange.setLine(1, sNewSign[1]);
-        if(sNewSign[2] != null && sNewSign[2].length() > 0)
+        if (sNewSign[2] != null && sNewSign[2].length() > 0)
             signToChange.setLine(2, sNewSign[2]);
-        if(sNewSign[3] != null && sNewSign[3].length() > 0)
+        if (sNewSign[3] != null && sNewSign[3].length() > 0)
             signToChange.setLine(3, sNewSign[3]);
         signToChange.update();
         String price;
-        if(sNewSign[3] != null && sNewSign[3].length() > 0)
+        if (sNewSign[3] != null && sNewSign[3].length() > 0)
             price = sNewSign[3];
         else
             price = sToChange[3];
 
         String sOperation;
-        if(sNewSign[0] != null && sNewSign[0].length() > 0)
+        if (sNewSign[0] != null && sNewSign[0].length() > 0)
             sOperation = SignShopUtil.getOperation(sNewSign[0]);
         else
             sOperation = SignShopUtil.getOperation(sToChange[0]);
 
-        if(!SignShopConfig.getBlocks(sOperation).isEmpty()) {
+        if (!SignShopConfig.getBlocks(sOperation).isEmpty()) {
             List<String> operation = SignShopConfig.getBlocks(sOperation);
-            if(!operation.contains("playerIsOp") && !ssPlayer.hasPerm(("SignShop.Signs."+sOperation), false)) {
+            if (!operation.contains("playerIsOp") && !ssPlayer.hasPerm(("SignShop.Signs."+sOperation), false)) {
                 ssPlayer.sendMessage(SignShopConfig.getError("no_permission", null));
                 return true;
             }
             List<SignShopOperationListItem> SignShopOperations = SignShopUtil.getSignShopOps(operation);
-            if(SignShopOperations == null) {
+            if (SignShopOperations == null) {
                 ssPlayer.sendMessage("The new operation does not exist!");
                 revert(shopSign, sToChange);
                 return true;
@@ -87,20 +88,20 @@ public class CopySign implements SignShopSpecialOp {
                     ssPlayer, ssPlayer, shopSign, sOperation, event.getBlockFace(), event.getAction(), SignShopArgumentsType.Setup);
 
             Boolean bSetupOK = false;
-            for(SignShopOperationListItem ssOperation : SignShopOperations) {
+            for (SignShopOperationListItem ssOperation : SignShopOperations) {
                 ssArgs.setOperationParameters(ssOperation.getParameters());
                 ssArgs.ignoreEmptyChest();
                 bSetupOK = ssOperation.getOperation().setupOperation(ssArgs);
                 if(!bSetupOK)
                     break;
             }
-            if(!bSetupOK) {
+            if (!bSetupOK) {
                 ssPlayer.sendMessage("The new and old operation are not compatible.");
                 revert(shopSign, sToChange);
                 return true;
             }
 
-            if(!SignShopUtil.getPriceFromMoneyEvent(ssArgs)) {
+            if (!SignShopUtil.getPriceFromMoneyEvent(ssArgs)) {
                 ssPlayer.sendMessage("The new and old operation are not compatible.");
                 revert(shopSign, sToChange);
                 return true;
@@ -108,13 +109,13 @@ public class CopySign implements SignShopSpecialOp {
 
             SSCreatedEvent createdevent = SSEventFactory.generateCreatedEvent(ssArgs);
             SignShop.callEvent(createdevent);
-            if(createdevent.isCancelled()) {
+            if (createdevent.isCancelled()) {
                 ssPlayer.sendMessage("The new and old operation are not compatible.");
                 revert(shopSign, sToChange);
                 return true;
             }
 
-            if(sNewSign[0] != null && sNewSign[0].length() > 0) {
+            if (sNewSign[0] != null && sNewSign[0].length() > 0) {
                 signToChange = ((Sign) shopSign.getState());
                 signToChange.setLine(0, sNewSign[0]);
                 signToChange.update();
@@ -132,7 +133,7 @@ public class CopySign implements SignShopSpecialOp {
     }
 
     public void revert(Block bSign, String[] oldLines) {
-        Sign sign = (Sign)bSign.getState();
+        Sign sign = (Sign) bSign.getState();
         sign.setLine(1, oldLines[1]);
         sign.setLine(2, oldLines[2]);
         sign.setLine(3, oldLines[3]);

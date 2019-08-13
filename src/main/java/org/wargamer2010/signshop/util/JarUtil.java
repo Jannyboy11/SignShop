@@ -22,7 +22,7 @@ public class JarUtil {
 
     public static boolean loadClass(String filename, String className) {
         try {
-            loadLocker.tryLock();
+            loadLocker.lock(); //tryLock() doesn't guarantee the lock is aquired. the result wasn't used either.
             File libLocation = new File(SignShop.getInstance().getDataFolder(), "lib" + File.separator + filename);
             if (!libLocation.exists())
                 getDriver(libLocation);

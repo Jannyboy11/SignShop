@@ -3,6 +3,10 @@ package org.wargamer2010.signshop.blocks;
 
 import org.bukkit.inventory.ItemStack;
 
+/**
+ * @deprecated use {@link org.bukkit.inventory.meta.BookMeta} instead.
+ */
+@Deprecated
 public interface IBookItem {
     String[] getPages();
 

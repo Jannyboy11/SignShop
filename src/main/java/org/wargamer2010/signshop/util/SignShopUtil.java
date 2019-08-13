@@ -453,7 +453,7 @@ public class SignShopUtil {
                 SSLinkEvent event = SSEventFactory.generateLinkEvent(clickedBlock, ssPlayer, null);
                 SignShop.callEvent(event);
                 if (event.isCancelled()) {
-                    SignShop.getInstance().getLogger().info("DEBUG registerClickedMaterial - SSLinkEvent got cancelled!");
+                    //SignShop.getInstance().getLogger().info("DEBUG registerClickedMaterial - SSLinkEvent got cancelled!");
                     return false;
                 } else {
                     //SignShop.getInstance().getLogger().info("DEBUG registerClickedMaterial - SSLinkEvent is not cancelled, doing stuff!");

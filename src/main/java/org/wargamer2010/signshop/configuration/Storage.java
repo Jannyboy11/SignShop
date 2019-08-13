@@ -547,6 +547,8 @@ public class Storage implements Listener, Runnable {
         return getShopsByBlock(block, true);
     }
 
+    //TODO can we optimize this? the time complexity of this is O(n * c(n)) where n is the number of shops, and c(n) the number of containables and activatables of a shop
+    //TODO A k-d tree would be an ideal solution to increase performance
     public Set<Shop> getShopsByBlock(Block bBlock, boolean checkDoubleChestOtherHalf) {
         Set<Shop> shops = new HashSet<>();
 
@@ -587,6 +589,7 @@ public class Storage implements Listener, Runnable {
 
     @Override
     public void run() {
+        //this is run asynchornously
         saveToFile();
     }
 
@@ -601,7 +604,11 @@ public class Storage implements Listener, Runnable {
         }
     }
 
+    @Deprecated
     private void saveToFile() {
+        //TODO DA FUQ - is this right? a while(true) loop without breaks or returns in its body?!
+        //TODO this method is called once, asynchronously. but it's much better to have it repeated async
+        //TODO and then NOT have this fucking while(true)
         while (true) {
             try {
                 FileConfiguration config = saveQueue.take();

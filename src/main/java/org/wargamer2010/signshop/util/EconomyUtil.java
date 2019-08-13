@@ -15,7 +15,7 @@ public class EconomyUtil {
     }
 
     public static String formatMoney(double money) {
-        if(Vault.getEconomy() == null)
+        if (Vault.getEconomy() == null)
             return attachColor(Double.toString(money));
         else
             return attachColor(Vault.getEconomy().format(money));
@@ -25,13 +25,13 @@ public class EconomyUtil {
         if (line == null) return 0.0d;
 
         String priceLine = ChatColor.stripColor(line);
-        String sPrice = "";
+        StringBuilder sPrice = new StringBuilder();
         double fPrice;
         for (int i = 0; i < priceLine.length(); i++)
             if (Character.isDigit(priceLine.charAt(i)) || priceLine.charAt(i) == '.')
-                sPrice += priceLine.charAt(i);
+                sPrice.append(priceLine.charAt(i));
         try {
-            fPrice = Double.parseDouble(sPrice);
+            fPrice = Double.parseDouble(sPrice.toString());
         } catch (NumberFormatException nfe) {
             fPrice = 0.0d;
         }

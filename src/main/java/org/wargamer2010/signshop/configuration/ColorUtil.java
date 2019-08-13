@@ -43,10 +43,10 @@ public class ColorUtil {
 
         // Load colors that will help guessing custom colornames
         FileConfiguration config = new YamlConfiguration();
-        config = configUtil.loadYMLFromJar(config, "colors.yml");
+        config = ConfigUtil.loadYMLFromJar(config, "colors.yml");
         if(config == null)
             return;
-        for(Map.Entry<String, String> entry : configUtil.fetchStringStringHashMap("colors", config).entrySet()) {
+        for(Map.Entry<String, String> entry : ConfigUtil.fetchStringStringHashMap("colors", config).entrySet()) {
             try {
                 int hex = Integer.parseInt(entry.getKey(), 16);
                 if(!colorLookup.containsKey(hex))

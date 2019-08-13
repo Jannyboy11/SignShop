@@ -4,6 +4,7 @@ import org.bukkit.*;
 import org.bukkit.block.data.Bisected;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.Door;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.block.Block;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.bukkit.event.block.Action;
@@ -64,13 +66,34 @@ public class ItemUtil {
         return isBackupToTake;
     }
 
+    /**
+     * Creates a stream of all non-null items in the storage slots of an inventory
+     * @param inventory the inventory
+     * @return a Stream of non-null ItemStacks that are found in the storage slots of the inventory
+     */
+    public static Stream<ItemStack> streamStorageContents(Inventory inventory) {
+        return Arrays.stream(inventory.getStorageContents()).filter(Objects::nonNull);
+    }
+
+    /**
+     * Creates a stream of all the non-null items in an inventory.
+     * @param inventory the inventory
+     * @return a Stream of all items in the inventory
+     */
+    public static Stream<ItemStack> streamInventory(Inventory inventory) {
+        return StreamSupport
+                .stream(Spliterators
+                        .spliterator(inventory.iterator(), inventory.getSize(),0), false)
+                .filter(Objects::nonNull);
+    }
+
     public static ItemStack[] getAllItemStacksForContainables(List<Block> containables) {
         return containables.stream()
                 .map(Block::getState)
                 .filter(InventoryHolder.class::isInstance)
                 .map(InventoryHolder.class::cast)
                 .map(InventoryHolder::getInventory)
-                .flatMap(inv -> StreamSupport.stream(Spliterators.spliterator(inv.iterator(), inv.getSize(), Spliterator.SIZED), false))
+                .flatMap(ItemUtil::streamInventory)
                 .toArray(ItemStack[]::new);
     }
 
@@ -181,13 +204,11 @@ public class ItemUtil {
 
     public static String formatData(Material material) {
         return stringFormat(material.name());
-        //return formatData(material.createBlockData());
     }
 
     public static String formatData(BlockData material) {
         return formatData(material.getMaterial());
         //TODO do we want to append more information that is in the blockdata?
-        //return material.getAsString(true);
     }
 
     private static String stringFormat(String sMaterial) {
@@ -280,10 +301,10 @@ public class ItemUtil {
     }
 
     public static void setSignStatus(Block sign, ChatColor color) {
-        if(isSign(sign)) {
+        if (isSign(sign)) {
             Sign signblock = ((Sign) sign.getState());
             String[] sLines = signblock.getLines();
-            if(ChatColor.stripColor(sLines[0]).length() < 14) {
+            if (ChatColor.stripColor(sLines[0]).length() < 14) {
                 signblock.setLine(0, (color + ChatColor.stripColor(sLines[0])));
                 signblock.update();
             }
@@ -291,12 +312,12 @@ public class ItemUtil {
     }
 
     public static Boolean needsEnchantment(ItemStack isEnchantMe, Map<Enchantment, Integer> enchantments) {
-        if(enchantments.isEmpty())
+        if (enchantments.isEmpty())
             return false;
         Map<Enchantment, Integer> currentEnchantments = isEnchantMe.getEnchantments();
         
-        for(Map.Entry<Enchantment, Integer> enchantment : enchantments.entrySet()) {
-            if(!currentEnchantments.containsKey(enchantment.getKey()) || !currentEnchantments.get(enchantment.getKey()).equals(enchantment.getValue())) {
+        for (Map.Entry<Enchantment, Integer> enchantment : enchantments.entrySet()) {
+            if (!currentEnchantments.containsKey(enchantment.getKey()) || !currentEnchantments.get(enchantment.getKey()).equals(enchantment.getValue())) {
                 return true;
             }
         }
@@ -450,16 +471,6 @@ public class ItemUtil {
         return null;
     }
 
-    public static String Join(String[] arr, int fromIndex) {
-        StringBuilder builder = new StringBuilder(400);
-        if(fromIndex > arr.length || fromIndex < 0)
-            return "";
-        for(int i = fromIndex; i < arr.length; i++) {
-            builder.append(arr[i]);
-        }
-        return builder.toString();
-    }
-
     public static ItemStack[] convertStringtoItemStacks(List<String> sItems) {
         return sItems.stream()
                 .map(itemStackArrayString -> {
@@ -555,8 +566,15 @@ public class ItemUtil {
     }
 
     public static boolean isWriteableBook(ItemStack item) {
-        if(item == null) return false;
-        return (item.getType() == Material.getMaterial("WRITTEN_BOOK") || item.getType() == Material.getMaterial("BOOK_AND_QUILL"));
+        if (item == null) return false;
+
+        switch (item.getType()) {
+            case WRITTEN_BOOK:
+            case WRITABLE_BOOK:
+                return true;
+            default:
+                return false;
+        }
     }
 
     public static String[] convertItemStacksToString(ItemStack[] isItems) {

@@ -21,8 +21,8 @@ import org.bukkit.plugin.Plugin;
 import org.wargamer2010.signshop.SignShop;
 import org.wargamer2010.signshop.util.SignShopUtil;
 
-public class configUtil {
-    private configUtil() {
+public class ConfigUtil {
+    private ConfigUtil() {
 
     }
 

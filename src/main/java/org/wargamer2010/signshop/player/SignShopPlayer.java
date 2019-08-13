@@ -115,7 +115,7 @@ public class SignShopPlayer {
     }
 
     public static boolean isOp(Player player) {
-        if(player == null)
+        if (player == null)
             return false;
         SignShopPlayer ssPlayer = new SignShopPlayer(player);
         return ssPlayer.isOp(player.getWorld());
@@ -142,9 +142,9 @@ public class SignShopPlayer {
     }
 
     private boolean isOpRaw() {
-        if(playerName.isEmpty())
+        if (playerName.isEmpty())
             return false;
-        if(getPlayer() == null) {
+        if (getPlayer() == null) {
             OfflinePlayer offplayer = playerId.getOfflinePlayer();
             return offplayer != null && offplayer.isOp();
         }
@@ -420,9 +420,20 @@ public class SignShopPlayer {
         if (getPlayer() == null)
             return null;
         ItemStack stack = getPlayer().getInventory().getItemInMainHand();
-        if (stack.getType() == Material.getMaterial("AIR"))
-            return null;
+        switch (stack.getType()) {
+            case AIR:
+            case CAVE_AIR:
+            case VOID_AIR:
+                return null;
+        }
         return stack;
+    }
+
+    public boolean hasItemInHand(Material material) {
+        ItemStack stack = getItemInHand();
+        if (stack == null) return false;
+
+        return stack.getType() == material;
     }
 
     public boolean isOwner(Shop shop) {

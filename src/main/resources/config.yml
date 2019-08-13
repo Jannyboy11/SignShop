@@ -188,6 +188,8 @@ AllowMultiWorldShops: false
 # All items can only be listed by item name since IDs are deprecated (http://jd.bukkit.org/rb/apidocs/org/bukkit/Material.html)
 Blacklisted_items:
   - AIR
+  - CAVE_AIR
+  - VOID_AIR
   - BARRIER
   - BEDROCK
 

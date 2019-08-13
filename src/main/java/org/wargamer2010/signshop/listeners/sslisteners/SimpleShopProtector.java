@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.block.Block;
@@ -35,30 +36,27 @@ public class SimpleShopProtector implements Listener {
         if (player == null || block == null) return false;
 
         SignShopPlayer ssPlayer = new SignShopPlayer(player);
-        if(ItemUtil.isSign(block)) {
+        if (ItemUtil.isSign(block)) {
             Shop shop = Storage.get().getShop(block.getLocation());
-            if (shop == null || shop.isOwner(ssPlayer) || SignShopPlayer.isOp(player) || !SignShopConfig.getEnableShopOwnerProtection())
-                return true;
-            else
-                return false;
+            return shop == null || shop.isOwner(ssPlayer) || SignShopPlayer.isOp(player) || !SignShopConfig.getEnableShopOwnerProtection();
         }
         return true;
     }
 
     private void cleanUpMiscStuff(String miscname, Block block) {
         List<Block> shopsWithSharesign = Storage.get().getShopsWithMiscSetting(miscname, SignShopUtil.convertLocationToString(block.getLocation()));
-        for(Block bTemp : shopsWithSharesign) {
+        for (Block bTemp : shopsWithSharesign) {
             Shop shop = Storage.get().getShop(bTemp.getLocation());
             String temp = shop.getMisc(miscname);
             temp = temp.replace(SignShopUtil.convertLocationToString(block.getLocation()), "");
-            temp = temp.replace(SignShopArguments.seperator+SignShopArguments.seperator, SignShopArguments.seperator);
-            if(temp.length() > 0) {
-                if(temp.endsWith(SignShopArguments.seperator))
-                    temp = temp.substring(0, temp.length()-1);
-                if(temp.length() > 1 && temp.charAt(0) == SignShopArguments.seperator.charAt(0))
+            temp = temp.replace(SignShopArguments.seperator + SignShopArguments.seperator, SignShopArguments.seperator);
+            if (temp.length() > 0) {
+                if (temp.endsWith(SignShopArguments.seperator))
+                    temp = temp.substring(0, temp.length() - 1);
+                if (temp.length() > 1 && temp.charAt(0) == SignShopArguments.seperator.charAt(0))
                     temp = temp.substring(1, temp.length());
             }
-            if(temp.length() == 0)
+            if (temp.length() == 0)
                 shop.removeMisc(miscname);
             else
                 shop.addMisc(miscname, temp);
@@ -66,20 +64,20 @@ public class SimpleShopProtector implements Listener {
     }
 
     private boolean isShopBrokenAfterBlockUnlink(Shop shop, Block toUnlink) {
-        List<Block> containables = new LinkedList<Block>();
+        List<Block> containables = new LinkedList<>();
         containables.addAll(shop.getContainables());
-        List<Block> activatables = new LinkedList<Block>();
+        List<Block> activatables = new LinkedList<>();
         activatables.addAll(shop.getActivatables());
 
-        if(containables.contains(toUnlink))
+        if (containables.contains(toUnlink))
             containables.remove(toUnlink);
-        if(activatables.contains(toUnlink))
+        if (activatables.contains(toUnlink))
             activatables.remove(toUnlink);
 
         SignShopPlayer ssPlayer = new SignShopPlayer(shop.getOwner().getIdentifier());
         ssPlayer.setIgnoreMessages(true);
 
-        if(!(shop.getSign().getState() instanceof Sign))
+        if (!(shop.getSign().getState() instanceof Sign))
             return true;
         Sign sign = (Sign) shop.getSign().getState();
 
@@ -109,7 +107,7 @@ public class SimpleShopProtector implements Listener {
 
         SSCreatedEvent createdevent = SSEventFactory.generateCreatedEvent(ssArgs);
         SignShop.callEvent(createdevent);
-        if(createdevent.isCancelled()) {
+        if (createdevent.isCancelled()) {
             return true;
         }
 
@@ -130,27 +128,26 @@ public class SimpleShopProtector implements Listener {
             return;
         }
 
-        if (event.hasPlayer()) {
-            if (ssPlayer.getPlayer().getGameMode() == GameMode.CREATIVE
-                    && SignShopConfig.getProtectShopsInCreative()
-                    && (ssPlayer.getItemInHand() == null || ssPlayer.getItemInHand().getType() != SignShopConfig.getDestroyMaterial())) {
-                event.setCancelled(true);
+        if (ssPlayer.getPlayer().getGameMode() == GameMode.CREATIVE
+                && SignShopConfig.getProtectShopsInCreative()
+                && !ssPlayer.hasItemInHand(SignShopConfig.getDestroyMaterial())) {
+            event.setCancelled(true);
 
-                if (event.getShop().isOwner(ssPlayer) || ssPlayer.isOp()) {
-                    Map<String, String> temp = new LinkedHashMap<>();
-                    temp.put("!destroymaterial", SignShopUtil.capFirstLetter(SignShopConfig.getDestroyMaterial().name().toLowerCase()));
+            if (event.getShop().isOwner(ssPlayer) || ssPlayer.isOp()) {
+                Map<String, String> temp = new LinkedHashMap<>();
+                temp.put("!destroymaterial", SignShopUtil.capFirstLetter(SignShopConfig.getDestroyMaterial().name().toLowerCase()));
 
-                    if (event.hasPlayer()) {
-                        event.getPlayer().sendMessage(SignShopConfig.getError("use_item_to_destroy_shop", temp));
-                    }
+                if (event.hasPlayer()) {
+                    event.getPlayer().sendMessage(SignShopConfig.getError("use_item_to_destroy_shop", temp));
                 }
-                return;
             }
 
-            boolean bCanDestroy = canDestroy(ssPlayer.getPlayer(), event.getBlock());
-            if (!bCanDestroy) {
-                event.setCancelled(true);
-            }
+            return;
+        }
+
+        boolean bCanDestroy = canDestroy(ssPlayer.getPlayer(), event.getBlock());
+        if (!bCanDestroy) {
+            event.setCancelled(true);
         }
     }
 
@@ -200,7 +197,7 @@ public class SimpleShopProtector implements Listener {
         SignShopPlayer ssPlayer = event.getPlayer();
 
         //cancel by default if the toucher is not the owner nor an admin
-        if (!touchedShop.isOwner(ssPlayer) && !ssPlayer.hasPerm("SignShop.TouchShop", true)){
+        if (!touchedShop.isOwner(ssPlayer) && !ssPlayer.hasPerm("SignShop.TouchShop", true)) {
             event.setCancelled(true);
         }
     }

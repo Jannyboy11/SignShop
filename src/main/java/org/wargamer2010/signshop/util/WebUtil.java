@@ -14,6 +14,10 @@ import org.jsoup.nodes.Element;
 import org.wargamer2010.signshop.SignShop;
 import org.wargamer2010.signshop.configuration.SignShopConfig;
 
+/**
+ * @deprecated no longer needed since item number IDs are gone
+ */
+@Deprecated
 public class WebUtil {
     private static final String namesURL = "http://minecraft-ids.grahamedgecombe.com/";
     private static final String baseLanguage = "en";

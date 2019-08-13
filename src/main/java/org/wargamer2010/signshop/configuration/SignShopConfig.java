@@ -114,15 +114,15 @@ public class SignShopConfig {
             copyFileFromJar(filename, false);
             File languageFile = new File(instance.getDataFolder(), filename);
             if(languageFile.exists()) {
-                FileConfiguration ymlThing = configUtil.loadYMLFromPluginFolder(filename);
+                FileConfiguration ymlThing = ConfigUtil.loadYMLFromPluginFolder(filename);
                 if(!language.equals("config")) {
-                    configUtil.loadYMLFromJar(ymlThing, filename);
+                    ConfigUtil.loadYMLFromJar(ymlThing, filename);
                 }
 
-                Messages.put(languageName, configUtil.fetchHasmapInHashmap("messages", ymlThing));
+                Messages.put(languageName, ConfigUtil.fetchHasmapInHashmap("messages", ymlThing));
                 if(Messages.get(languageName) == null)
                     continue;
-                Errors.put(languageName, configUtil.fetchStringStringHashMap("errors", ymlThing));
+                Errors.put(languageName, ConfigUtil.fetchStringStringHashMap("errors", ymlThing));
                 if(Errors.get(languageName) == null)
                     continue;
                 if(preferedLanguage.isEmpty())
@@ -133,10 +133,10 @@ public class SignShopConfig {
         }
         if(preferedLanguage.isEmpty())
             preferedLanguage = baseLanguage;
-        PriceMultipliers = configUtil.fetchDoubleHasmapInHashmap("pricemultipliers", config);
-        Commands = configUtil.fetchListInHashmap("commands", config);
-        DelayedCommands = configUtil.fetchListInHashmap("timedCommands", config);
-        ShopLimits = configUtil.fetchStringIntegerHashMap("limits", config);
+        PriceMultipliers = ConfigUtil.fetchDoubleHasmapInHashmap("pricemultipliers", config);
+        Commands = ConfigUtil.fetchListInHashmap("commands", config);
+        DelayedCommands = ConfigUtil.fetchListInHashmap("timedCommands", config);
+        ShopLimits = ConfigUtil.fetchStringIntegerHashMap("limits", config);
         setupBlacklist();
         copyFileFromJar("SSQuickReference.pdf", true);
         setupOperations();
@@ -193,7 +193,7 @@ public class SignShopConfig {
 
     private static void setupLinkables() {
         LinkableMaterials = new ArrayList<>();
-        for(Map.Entry<String, String> entry : configUtil.fetchStringStringHashMap("linkableMaterials", config, false).entrySet()) {
+        for(Map.Entry<String, String> entry : ConfigUtil.fetchStringStringHashMap("linkableMaterials", config, false).entrySet()) {
             byte data = -1;
             String material;
             if(entry.getKey().contains("~")) {
@@ -237,10 +237,10 @@ public class SignShopConfig {
     }
 
     private static void initConfig() {
-        FileConfiguration ymlThing = configUtil.loadYMLFromPluginFolder(configFilename);
+        FileConfiguration ymlThing = ConfigUtil.loadYMLFromPluginFolder(configFilename);
         if(ymlThing == null)
             return;
-        configUtil.loadYMLFromJar(ymlThing, configFilename);
+        ConfigUtil.loadYMLFromJar(ymlThing, configFilename);
 
         MaxSellDistance = ymlThing.getInt("MaxSellDistance", MaxSellDistance);
         TransactionLog = ymlThing.getBoolean("TransactionLog", TransactionLog);
@@ -291,7 +291,7 @@ public class SignShopConfig {
     }
 
     private static void setupOperations() {
-        setupOperations(configUtil.fetchStringStringHashMap("signs", config));
+        setupOperations(ConfigUtil.fetchStringStringHashMap("signs", config));
     }
 
     public static void setupOperations(Map<String, String> allSignOperations) {
@@ -360,7 +360,7 @@ public class SignShopConfig {
                 } catch(InvalidConfigurationException ex) {
                     continue;
                 }
-                HashMap<String,String> tempSignAliases = configUtil.fetchStringStringHashMap("signs", ymlThing);
+                HashMap<String,String> tempSignAliases = ConfigUtil.fetchStringStringHashMap("signs", ymlThing);
                 for(Map.Entry<String, String> alias : tempSignAliases.entrySet()) {
                     if(Operations.containsKey(alias.getValue().toLowerCase())) {
                         SignShopConfig.OperationAliases.put(alias.getKey().toLowerCase(), alias.getValue().toLowerCase());
@@ -388,7 +388,7 @@ public class SignShopConfig {
     private static void fixIncompleOperations() {
         if(!fixIncompleteOperations)
             return;
-        HashMap<String,String> tempSignOperations = configUtil.fetchStringStringHashMap("signs", config, true);
+        HashMap<String,String> tempSignOperations = ConfigUtil.fetchStringStringHashMap("signs", config, true);
         Boolean changedSomething = false;
         for(Map.Entry<String, List<String>> entry :  Operations.entrySet()) {
             if(SignShopConfig.Commands.containsKey(entry.getKey().toLowerCase())) {
@@ -410,7 +410,7 @@ public class SignShopConfig {
             }
         }
         if(changedSomething)
-            configUtil.loadYMLFromJar(config, configFilename);
+            ConfigUtil.loadYMLFromJar(config, configFilename);
     }
 
     private static void closeStream(Closeable in) {

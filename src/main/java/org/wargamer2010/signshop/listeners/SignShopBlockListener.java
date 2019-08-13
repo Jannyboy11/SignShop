@@ -28,18 +28,18 @@ import org.wargamer2010.signshop.util.SignShopUtil;
 public class SignShopBlockListener implements Listener {
 
     private List<Block> getAttachables(Block from) {
-        List<Block> attachables = new ArrayList<Block>();
-        List<BlockFace> checkFaces = new ArrayList<BlockFace>();
+        List<Block> attachables = new ArrayList<>();
+        List<BlockFace> checkFaces = new ArrayList<>();
         checkFaces.add(BlockFace.UP);
         checkFaces.add(BlockFace.NORTH);
         checkFaces.add(BlockFace.EAST);
         checkFaces.add(BlockFace.SOUTH);
         checkFaces.add(BlockFace.WEST);
 
-        for(BlockFace face : checkFaces) {
-            if(from.getRelative(face).getState().getData() instanceof Attachable) {
+        for (BlockFace face : checkFaces) {
+            if (from.getRelative(face).getState().getData() instanceof Attachable) {
                 Attachable att = (Attachable)from.getRelative(face).getState().getData();
-                if(from.getRelative(face).getRelative(att.getAttachedFace()).equals(from))
+                if (from.getRelative(face).getRelative(att.getAttachedFace()).equals(from))
                     attachables.add(from.getRelative(face));
             }
         }
@@ -85,10 +85,10 @@ public class SignShopBlockListener implements Listener {
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void onBlockBurn(BlockBurnEvent event) {
-        if(event.isCancelled())
-            return;
+//        if(event.isCancelled())
+//            return;
 
-        if(!canBreakBlock(event.getBlock(), null, true))
+        //if(!canBreakBlock(event.getBlock(), null, true))
             event.setCancelled(true);
     }
 

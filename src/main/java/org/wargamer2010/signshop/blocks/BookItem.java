@@ -8,6 +8,10 @@ import org.wargamer2010.signshop.SignShop;
 import java.util.Arrays;
 import java.util.logging.Level;
 
+/**
+ * @deprecated use {@link org.bukkit.inventory.meta.BookMeta} instead.
+ */
+@Deprecated
 public class BookItem implements IBookItem {
 
         protected BookMeta meta = null;
