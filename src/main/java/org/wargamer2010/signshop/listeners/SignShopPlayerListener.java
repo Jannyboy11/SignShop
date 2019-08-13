@@ -134,10 +134,10 @@ public class SignShopPlayerListener implements Listener {
 
         String[] sLines = event.getLines();
         String sOperation = SignShopUtil.getOperation(sLines[0]);
-        if (SignShopConfig.getBlocks(sOperation).isEmpty())
+        if (SignShopConfig.getIndividualOperations(sOperation).isEmpty())
             return;
 
-        List<String> operation = SignShopConfig.getBlocks(sOperation);
+        List<String> operation = SignShopConfig.getIndividualOperations(sOperation);
         if (SignShopUtil.getSignShopOps(operation) == null)
             return;
 
@@ -171,18 +171,18 @@ public class SignShopPlayerListener implements Listener {
             if (ItemUtil.isSign(clickedBlock) && event.getItem().getType() == SignShopConfig.getLinkMaterial()) {
                 //CASE: LINK
                 SignShop signShop = SignShop.getInstance();
-                signShop.getLogger().info("DEBUG - PlayerInterActEvent - Case: Link");
+                //signShop.getLogger().info("DEBUG - PlayerInterActEvent - Case: Link");
 
                 sLines = ((Sign) clickedBlock.getState()).getLines();
                 sOperation = SignShopUtil.getOperation(sLines[0]);
-                if (SignShopConfig.getBlocks(sOperation).isEmpty()) {
+                if (SignShopConfig.getIndividualOperations(sOperation).isEmpty()) {
                     if (!runSpecialOperations(event) && !SignShopUtil.registerClickedMaterial(event)) {
                         ssPlayer.sendMessage(SignShopConfig.getError("invalid_operation", null));
                     }
                     return;
                 }
 
-                List<String> operation = SignShopConfig.getBlocks(sOperation);
+                List<String> operation = SignShopConfig.getIndividualOperations(sOperation);
                 List<SignShopOperationListItem> SignShopOperations = SignShopUtil.getSignShopOps(operation);
                 if (SignShopOperations == null) {
                     ssPlayer.sendMessage(SignShopConfig.getError("invalid_operation", null));
@@ -250,11 +250,11 @@ public class SignShopPlayerListener implements Listener {
             sOperation = SignShopUtil.getOperation(sLines[0]);
 
             // Verify the operation
-            if (SignShopConfig.getBlocks(sOperation).isEmpty()){
+            if (SignShopConfig.getIndividualOperations(sOperation).isEmpty()){
                 return;
             }
 
-            List<String> operation = SignShopConfig.getBlocks(sOperation);
+            List<String> operation = SignShopConfig.getIndividualOperations(sOperation);
 
             List<SignShopOperationListItem> signShopOperations = SignShopUtil.getSignShopOps(operation);
             if (signShopOperations == null) {

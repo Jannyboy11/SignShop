@@ -16,7 +16,7 @@ public class PermissionChecker implements Listener {
     public void onSSBuildEvent(SSCreatedEvent event) {
         if(event.isCancelled() || !event.canBeCancelled())
             return;
-        List<String> operation = SignShopConfig.getBlocks(event.getOperation());
+        List<String> operation = SignShopConfig.getIndividualOperations(event.getOperation());
         String sOperation = event.getOperation();
         if(!operation.contains("playerIsOp") && !event.getPlayer().hasPerm(("SignShop.Signs."+sOperation), false) && !event.getPlayer().hasPerm(("SignShop.Signs.*"), false)) {
             event.getPlayer().sendMessage(SignShopConfig.getError("no_permission", null));

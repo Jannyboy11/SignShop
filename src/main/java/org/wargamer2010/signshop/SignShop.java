@@ -6,6 +6,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.*;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -32,7 +33,7 @@ import org.wargamer2010.signshop.util.WebUtil;
 import org.wargamer2010.signshop.util.CommandUtil;
 import org.wargamer2010.skript.EvtSSPretransaction;
 
-public class SignShop extends JavaPlugin{
+public class SignShop extends JavaPlugin {
 
     private static SignShop instance;
 
@@ -69,8 +70,8 @@ public class SignShop extends JavaPlugin{
 
     //Logging
     public void log(String message, Level level, int tag) {
-        if(message != null && !message.trim().isEmpty())
-            getLogger().log(level, "["+tag+"] " + message);
+        if (message != null && !message.trim().isEmpty())
+            getLogger().log(level, "[" + tag + "] " + message);
     }
 
     //TODO un-static this
@@ -82,7 +83,7 @@ public class SignShop extends JavaPlugin{
 
     //TODO un-static this
     public static void logTransaction(String customer, String owner, String Operation, String items, String Price) {
-        if(SignShopConfig.getTransactionLog()) {
+        if (SignShopConfig.getTransactionLog()) {
             String fixedItems = (items.isEmpty() ? "none" : items);
             String message = ("Customer: " + customer + ", Owner: " + owner + ", Operation: " + Operation + ", Items: " + fixedItems + ", Price: " + Price);
             transactionlogger.log(Level.INFO, message);
@@ -110,8 +111,8 @@ public class SignShop extends JavaPlugin{
         }
 
         metricsSetup = new SetupMetrics(this);
-        if(!metricsSetup.isOptOut()) {
-            if(metricsSetup.setup())
+        if (!metricsSetup.isOptOut()) {
+            if (metricsSetup.setup())
                 log("Succesfully started Metrics, see http://mcstats.org for more information.", Level.INFO);
             else
                 log("Could not start Metrics, see http://mcstats.org for more information.", Level.INFO);
@@ -134,7 +135,7 @@ public class SignShop extends JavaPlugin{
         PlayerMetadata.convertToUuid(this);
 
         // Create a storage locker for shops
-        store = Storage.init(new File(this.getDataFolder(),"sellers.yml"));
+        store = Storage.init(new File(this.getDataFolder(), "sellers.yml"));
         manager = new TimeManager(new File(this.getDataFolder(), "timing.yml"));
 
         if (SignShopConfig.getTransactionLog()) {
@@ -147,7 +148,7 @@ public class SignShop extends JavaPlugin{
                 transactionlogger.setLevel(Level.INFO);
                 transactionlogger.setParent(getLogger());
                 transactionlogger.setUseParentHandlers(false);
-            } catch(IOException ex) {
+            } catch (IOException ex) {
                 log("Failed to create transaction log", Level.INFO);
             }
         }
@@ -179,7 +180,7 @@ public class SignShop extends JavaPlugin{
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String args[]) {
         String commandName = cmd.getName().toLowerCase();
-        if(!commandName.equalsIgnoreCase("signshop"))
+        if (!commandName.equalsIgnoreCase("signshop"))
             return true;
         return CommandUtil.handleCommand(sender, cmd, commandLabel, args, commandDispatcher);
     }
@@ -190,7 +191,7 @@ public class SignShop extends JavaPlugin{
 
     public static String getLogPrefix() {
         PluginDescriptionFile pdfFile = SignShop.getInstance().getDescription();
-        String prefix = ChatColor.GOLD + "[SignShop] [" +pdfFile.getVersion() +"]" + ChatColor.RED;
+        String prefix = ChatColor.GOLD + "[SignShop] [" + pdfFile.getVersion() + "]" + ChatColor.RED;
         return prefix;
     }
 
@@ -206,11 +207,11 @@ public class SignShop extends JavaPlugin{
     @Override
     public void onDisable() {
         closeHandlers();
-        if(store != null) {
+        if (store != null) {
             store.save();
             store.dispose();
         }
-        if(manager != null)
+        if (manager != null)
             manager.stop();
         log("Disabled", Level.INFO);
     }
@@ -224,13 +225,13 @@ public class SignShop extends JavaPlugin{
         //TODO find out whether vault uses that as a default or not.
         //TODO we want to use bukkit's permission system anyway so.. i'm not sure why we're checking Vault permissions
         //TODO The economy functionality from Vault is useful though :)
-        if(!vaultPermissions || vault.getPermission().getName().equals("SuperPerms")) {
+        if (!vaultPermissions || vault.getPermission().getName().equals("SuperPerms")) {
             log("Vault's permissions not found, defaulting to OP.", Level.INFO);
             USE_PERMISSIONS = false;
         } else
             USE_PERMISSIONS = true;
         boolean vault_Economy = vault.setupEconomy();
-        if(!vault_Economy)
+        if (!vault_Economy)
             log("Could not hook into Vault's Economy!", Level.WARNING);
     }
 
@@ -266,9 +267,9 @@ public class SignShop extends JavaPlugin{
         pm.registerEvents(new MoneyModifierListener(), this);
 
         DynmapManager dmm = new DynmapManager();
-        if(SignShopConfig.getEnableDynmapSupport())
+        if (SignShopConfig.getEnableDynmapSupport())
             pm.registerEvents(dmm, this);
-        if(SignShopConfig.getEnableShopPlotSupport()) {
+        if (SignShopConfig.getEnableShopPlotSupport()) {
             //pm.registerEvents(new WorldGuardChecker(), this);
             pm.registerEvents(new TownyChecker(), this);
         }

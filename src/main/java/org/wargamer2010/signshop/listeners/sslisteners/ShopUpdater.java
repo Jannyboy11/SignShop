@@ -1,6 +1,7 @@
 
 package org.wargamer2010.signshop.listeners.sslisteners;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
@@ -9,10 +10,10 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.inventory.BlockInventoryHolder;
-import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.*;
 import org.wargamer2010.signshop.Shop;
+import org.wargamer2010.signshop.SignShop;
+import org.wargamer2010.signshop.configuration.SignShopConfig;
 import org.wargamer2010.signshop.configuration.Storage;
 import org.wargamer2010.signshop.events.SSCreatedEvent;
 import org.wargamer2010.signshop.events.SSItemMoveEvent;
@@ -21,15 +22,11 @@ import org.wargamer2010.signshop.events.SSTouchShopEvent;
 import org.wargamer2010.signshop.operations.SignShopOperationListItem;
 import org.wargamer2010.signshop.operations.givePlayerItems;
 import org.wargamer2010.signshop.operations.takePlayerItems;
-import org.wargamer2010.signshop.player.VirtualInventory;
 import org.wargamer2010.signshop.util.ItemUtil;
 import org.wargamer2010.signshop.util.SignShopUtil;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 public class ShopUpdater implements Listener {
 
@@ -65,21 +62,7 @@ public class ShopUpdater implements Listener {
         }
 
         for (Shop shop : shops) {
-           updateShopSign(shop);
-        }
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onShopRestock(InventoryCloseEvent event) {
-        //TODO call ShopRestockEvent or something?
-        InventoryHolder holder = event.getInventory().getHolder();
-        if (holder instanceof BlockInventoryHolder) {
-            BlockInventoryHolder blockInventoryHolder = (BlockInventoryHolder) holder;
-
-            Block block = blockInventoryHolder.getBlock();
-            for (Shop shop : Storage.get().getShopsByBlock(block)) {
-                updateShopSign(shop);
-            }
+            updateShopSign(shop);
         }
     }
 
@@ -90,13 +73,46 @@ public class ShopUpdater implements Listener {
         updateShopSign(event.getShop());
     }
 
-    private enum BuySell { BUY, SELL, AMBIGUOUS, UNKNOWN }
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onShopRestock(InventoryCloseEvent event) {
+        //TODO call ShopRestockEvent or something?
 
-    private void updateShopSign(Shop shop) {
+        //TODO does not work yet. FIXME!!
+        InventoryHolder holder = event.getInventory().getHolder();
+        if (holder instanceof BlockInventoryHolder) {
+            updateShopSign(event.getInventory());
+        } else if (event.getInventory() instanceof DoubleChestInventory) {
+            DoubleChestInventory doubleChestInventory = (DoubleChestInventory) event.getInventory();
+
+            Inventory leftInventory = doubleChestInventory.getLeftSide();
+            Inventory rightInventory = doubleChestInventory.getRightSide();
+            updateShopSign(leftInventory);
+            updateShopSign(rightInventory);
+        }
+    }
+
+    private static void updateShopSign(Inventory inventory) {
+        InventoryHolder holder = inventory.getHolder();
+        if (holder instanceof BlockInventoryHolder) {
+            BlockInventoryHolder blockInventoryHolder = (BlockInventoryHolder) holder;
+
+            Block block = blockInventoryHolder.getBlock();
+            Storage storage = Storage.get();
+            for (Shop shop : storage.getShopsByBlock(block)) {
+                updateShopSign(shop);
+            }
+        }
+    }
+
+    private enum BuySell {BUY, SELL, AMBIGUOUS, UNKNOWN}
+
+    private static void updateShopSign(Shop shop) {
         Sign sign = (Sign) shop.getSign().getState();
         String firstLine = sign.getLine(0);
-        List<SignShopOperationListItem> operations = SignShopUtil.getSignShopOps(Arrays.asList(firstLine));
-        //TODO debug operations
+
+        String opName = SignShopUtil.getOperation(firstLine);
+        List<String> individualOperations = SignShopConfig.getIndividualOperations(opName);
+        List<SignShopOperationListItem> operations = SignShopUtil.getSignShopOps(individualOperations);
 
         if (operations == null) return;
 
@@ -150,6 +166,7 @@ public class ShopUpdater implements Listener {
 
     /**
      * Check whether the shop has enough space in its containers
+     *
      * @param shop the shop
      * @return true if there is enough space, otherwise false
      */
@@ -208,6 +225,7 @@ public class ShopUpdater implements Listener {
 
     /**
      * Checks whether the shop has enough items in its containers;
+     *
      * @param shop the shop to check
      * @return true if the shop has the items in its containers, otherwise false
      */
@@ -216,7 +234,11 @@ public class ShopUpdater implements Listener {
         ItemStack[] shopItems = shop.getItems(false);
         Map<ItemStack, Integer> itemsForSale = Arrays.stream(shopItems)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toMap(is -> {ItemStack c = is.clone(); c.setAmount(1); return c;}, ItemStack::getAmount, Integer::sum));
+                .collect(Collectors.toMap(is -> {
+                    ItemStack c = is.clone();
+                    c.setAmount(1);
+                    return c;
+                }, ItemStack::getAmount, Integer::sum));
 
         Map<ItemStack, Integer> availableItems = shop.getContainables().stream()
                 .map(Block::getState)
@@ -225,7 +247,11 @@ public class ShopUpdater implements Listener {
                 .map(InventoryHolder::getInventory)
                 .flatMap(ItemUtil::streamStorageContents)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toMap(is -> {ItemStack c = is.clone(); c.setAmount(1); return c;}, ItemStack::getAmount, Integer::sum));
+                .collect(Collectors.toMap(is -> {
+                    ItemStack c = is.clone();
+                    c.setAmount(1);
+                    return c;
+                }, ItemStack::getAmount, Integer::sum));
 
         //for every item that the shop can sell/buy
         for (Map.Entry<ItemStack, Integer> entry : itemsForSale.entrySet()) {

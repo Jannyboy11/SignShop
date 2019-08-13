@@ -417,9 +417,9 @@ public class ItemUtil {
             if(pSign == null || !(pSign.getState() instanceof Sign))
                 return;
             String[] sLines = ((Sign) pSign.getState()).getLines();
-            if(SignShopConfig.getBlocks(SignShopUtil.getOperation(sLines[0])).isEmpty())
+            if(SignShopConfig.getIndividualOperations(SignShopUtil.getOperation(sLines[0])).isEmpty())
                 return;
-            List<String> operation = SignShopConfig.getBlocks(SignShopUtil.getOperation(sLines[0]));
+            List<String> operation = SignShopConfig.getIndividualOperations(SignShopUtil.getOperation(sLines[0]));
             List<SignShopOperationListItem> SignShopOperations = SignShopUtil.getSignShopOps(operation);
             if(SignShopOperations == null)
                 return;

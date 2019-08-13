@@ -31,7 +31,7 @@ public class HelpHandler implements ICommandHandler {
             filtered.addAll(all);
         else {
             for(String op : all) {
-                List<String> operation = SignShopConfig.getBlocks(op);
+                List<String> operation = SignShopConfig.getIndividualOperations(op);
                 if(!operation.contains("playerIsOp") && (player.hasPerm(("SignShop.Signs." + op), false) || player.hasPerm(("SignShop.Signs.*"), false)))
                     filtered.add(op);
                 else if(operation.contains("playerIsOp") && (player.hasPerm(("SignShop.Admin."+op), true) || player.hasPerm(("SignShop.Admin.*"), true)))

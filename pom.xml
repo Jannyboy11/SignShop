@@ -62,7 +62,7 @@
         </repository>
         <repository>
             <id>ess-repo</id>
-            <url>http://repo.ess3.net/content/groups/essentials</url>
+            <url>https://ci.ender.zone/plugin/repository/everything/</url>
         </repository>
     </repositories>
 
@@ -118,11 +118,13 @@
             <groupId>com.sk89q.worldguard</groupId>
             <artifactId>worldguard-core</artifactId>
             <version>7.0.0-20181010.132528-6</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.github.TechFortress</groupId>
             <artifactId>GriefPrevention</artifactId>
-            <version>16.7.1</version>
+            <version>16.11.6</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.github.derwisch</groupId>
@@ -146,10 +148,10 @@
 <!--            <version>1.0.0</version>-->
 <!--        </dependency>-->
         <dependency>
-            <!-- on the Ess Repo -->
+            <!-- on the EssentialsX Repo -->
             <groupId>net.ess3</groupId>
-            <artifactId>Essentials</artifactId>
-            <version>2.13.1</version> <!-- Stable version -->
+            <artifactId>EssentialsX</artifactId>
+            <version>2.17.1</version>
             <scope>provided</scope>
         </dependency>
 <!--        <dependency>-->
@@ -163,14 +165,14 @@
             <groupId>org.dynmap</groupId>
             <artifactId>dynmap</artifactId>
             <scope>system</scope>
-            <systemPath>${project.basedir}/libs/Dynmap-3.0-beta-3-spigot.jar</systemPath>
+            <systemPath>${project.basedir}/libs/Dynmap-3.0-beta-5-spigot.jar</systemPath>
             <version>3.0</version>
         </dependency>
         <dependency>
             <groupId>com.griefcraft</groupId>
             <artifactId>lwc</artifactId>
             <scope>system</scope>
-            <systemPath>${project.basedir}/libs/Modern-LWC-2.1.2.jar</systemPath>
+            <systemPath>${project.basedir}/libs/Modern-LWC-2.1.5.jar</systemPath>
             <version>2.1.2</version>
         </dependency>
         <dependency>
@@ -178,7 +180,7 @@
             <artifactId>towny</artifactId>
             <scope>system</scope>
             <systemPath>${project.basedir}/libs/Towny.jar</systemPath>
-            <version>1.0.0</version>
+            <version>0.94.0.0</version>
         </dependency>
 <!--        <dependency>-->
 <!--            <groupId>com.worldcretornica</groupId>-->

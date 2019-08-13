@@ -72,8 +72,8 @@ public class CopySign implements SignShopSpecialOp {
         else
             sOperation = SignShopUtil.getOperation(sToChange[0]);
 
-        if (!SignShopConfig.getBlocks(sOperation).isEmpty()) {
-            List<String> operation = SignShopConfig.getBlocks(sOperation);
+        if (!SignShopConfig.getIndividualOperations(sOperation).isEmpty()) {
+            List<String> operation = SignShopConfig.getIndividualOperations(sOperation);
             if (!operation.contains("playerIsOp") && !ssPlayer.hasPerm(("SignShop.Signs."+sOperation), false)) {
                 ssPlayer.sendMessage(SignShopConfig.getError("no_permission", null));
                 return true;

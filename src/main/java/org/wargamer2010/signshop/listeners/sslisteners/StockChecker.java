@@ -21,7 +21,7 @@ public class StockChecker implements Listener {
         if(!event.getMessageParts().containsKey("!price") || !event.getMessageParts().containsKey("!items") || event.getContainables().isEmpty())
             return;
         
-        List<String> operation = SignShopConfig.getBlocks(event.getOperation());
+        List<String> operation = SignShopConfig.getIndividualOperations(event.getOperation());
         // TODO: Think of a better way to check whether the stock check is needed.
         // For now we'll assume that all admin shops don't have stock that needs to be checked.
         if(operation.contains("playerIsOp"))

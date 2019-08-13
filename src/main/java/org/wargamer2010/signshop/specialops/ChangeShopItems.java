@@ -34,7 +34,7 @@ public class ChangeShopItems implements SignShopSpecialOp {
         if (!ssPlayer.hasItemInHand(SignShopConfig.getUpdateMaterial()))
             return false;
         SignShopPlayer ssOwner = shop.getOwner();
-        List<String> operation = SignShopConfig.getBlocks(sOperation);
+        List<String> operation = SignShopConfig.getIndividualOperations(sOperation);
         String[] sLines = ((Sign) bClicked.getState()).getLines();
 
         if (!shop.isOwner(ssPlayer) && !ssPlayer.isOp()) {

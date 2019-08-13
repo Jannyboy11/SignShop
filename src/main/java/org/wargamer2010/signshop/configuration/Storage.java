@@ -2,7 +2,6 @@ package org.wargamer2010.signshop.configuration;
 
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.type.Chest;
-import org.bukkit.configuration.MemorySection;
 import org.bukkit.inventory.BlockInventoryHolder;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -465,7 +464,7 @@ public class Storage implements Listener, Runnable {
                 Block bSign = Bukkit.getServer().getWorld(entry.getValue().getWorld()).getBlockAt(entry.getKey());
                 if (ItemUtil.isSign(bSign)) {
                     String[] sLines = ((Sign) bSign.getState()).getLines();
-                    List<String> operation = SignShopConfig.getBlocks(SignShopUtil.getOperation(sLines[0]));
+                    List<String> operation = SignShopConfig.getIndividualOperations(SignShopUtil.getOperation(sLines[0]));
                     if (operation.isEmpty())
                         continue;
                     // Not isOP. No need to count OP signs here because admins aren't really their owner

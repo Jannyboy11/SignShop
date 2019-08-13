@@ -5,6 +5,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -23,6 +24,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.TreeMap;
 import java.util.logging.Level;
+
 import org.bukkit.Bukkit;
 import org.wargamer2010.signshop.util.SignShopUtil;
 import org.wargamer2010.signshop.hooks.HookManager;
@@ -35,16 +37,16 @@ import org.wargamer2010.signshop.specialops.*;
 public class SignShopConfig {
     private static final String defaultOPPackage = "org.wargamer2010.signshop.operations";
     private static final String configFilename = "config.yml";
-    private static final Map<String,SignShopOperation> OperationInstances = new LinkedHashMap<String, SignShopOperation>();
-    private static Map<String,List<String>> Operations = new HashMap<String,List<String>>();
-    private static Map<String,String> OperationAliases;                         // Alias <-> Original
-    private static Map<String,Map<String,HashMap<String,String>>> Messages;
-    private static Map<String,Map<String,String>> Errors;
+    private static final Map<String, SignShopOperation> OperationInstances = new LinkedHashMap<String, SignShopOperation>();
+    private static Map<String, List<String>> Operations = new HashMap<String, List<String>>();
+    private static Map<String, String> OperationAliases;                         // Alias <-> Original
+    private static Map<String, Map<String, HashMap<String, String>>> Messages;
+    private static Map<String, Map<String, String>> Errors;
     private static List<Material> BlacklistedItems;
-    private static Map<String,HashMap<String,Double>> PriceMultipliers;
-    private static Map<String,List<String>> Commands;
-    private static Map<String,List<String>> DelayedCommands;
-    private static Map<String,Integer> ShopLimits;
+    private static Map<String, HashMap<String, Double>> PriceMultipliers;
+    private static Map<String, List<String>> Commands;
+    private static Map<String, List<String>> DelayedCommands;
+    private static Map<String, Integer> ShopLimits;
     private static List<LinkableMaterial> LinkableMaterials;
     private static final List<SignShopSpecialOp> SpecialsOps = new LinkedList<>();
 
@@ -91,8 +93,8 @@ public class SignShopConfig {
 
     private static List<String> getOrderedListFromArray(String[] array) {
         List<String> list = new LinkedList<String>();
-        for(String item : array)
-            if(!list.contains(item.toLowerCase().trim()))
+        for (String item : array)
+            if (!list.contains(item.toLowerCase().trim()))
                 list.add(item.toLowerCase().trim());
         return list;
     }
@@ -102,36 +104,36 @@ public class SignShopConfig {
         initConfig();
         String LanguagesAdjusted = Languages.replace(baseLanguage, "config");
         List<String> aLanguages = getOrderedListFromArray(LanguagesAdjusted.split(","));
-        if(!aLanguages.contains("config"))
+        if (!aLanguages.contains("config"))
             aLanguages.add("config");
 
         Messages = new LinkedHashMap<>();
         Errors = new LinkedHashMap<>();
         preferedLanguage = "";
-        for(String language : aLanguages) {
+        for (String language : aLanguages) {
             String filename = (language + ".yml");
             String languageName = (language.equals("config") ? baseLanguage : language);
             copyFileFromJar(filename, false);
             File languageFile = new File(instance.getDataFolder(), filename);
-            if(languageFile.exists()) {
+            if (languageFile.exists()) {
                 FileConfiguration ymlThing = ConfigUtil.loadYMLFromPluginFolder(filename);
-                if(!language.equals("config")) {
+                if (!language.equals("config")) {
                     ConfigUtil.loadYMLFromJar(ymlThing, filename);
                 }
 
                 Messages.put(languageName, ConfigUtil.fetchHasmapInHashmap("messages", ymlThing));
-                if(Messages.get(languageName) == null)
+                if (Messages.get(languageName) == null)
                     continue;
                 Errors.put(languageName, ConfigUtil.fetchStringStringHashMap("errors", ymlThing));
-                if(Errors.get(languageName) == null)
+                if (Errors.get(languageName) == null)
                     continue;
-                if(preferedLanguage.isEmpty())
+                if (preferedLanguage.isEmpty())
                     preferedLanguage = languageName;
             } else {
                 SignShop.log("The languagefile " + languageFile + " for language: " + languageName + " could not be found in the plugin directory!", Level.WARNING);
             }
         }
-        if(preferedLanguage.isEmpty())
+        if (preferedLanguage.isEmpty())
             preferedLanguage = baseLanguage;
         PriceMultipliers = ConfigUtil.fetchDoubleHasmapInHashmap("pricemultipliers", config);
         Commands = ConfigUtil.fetchListInHashmap("commands", config);
@@ -166,7 +168,7 @@ public class SignShopConfig {
     private static void setupSpecialsOps() {
         SpecialsOps.add(new ConvertChestshop());
         SpecialsOps.add(new CopySign());
-        if(Bukkit.getServer().getPluginManager().getPlugin("ShowCaseStandalone") != null)
+        if (Bukkit.getServer().getPluginManager().getPlugin("ShowCaseStandalone") != null)
             SpecialsOps.add(new LinkShowcase());
         SpecialsOps.add(new LinkSpecialSign());
         SpecialsOps.add(new ChangeOwner());
@@ -175,7 +177,7 @@ public class SignShopConfig {
     }
 
     private static void safeAddLinkeable(String sName, String sGroup, byte sData) {
-        if(sName == null || sGroup == null || sName.isEmpty())
+        if (sName == null || sGroup == null || sName.isEmpty())
             return;
         Material material = Material.matchMaterial(sName);
         if (material == null)
@@ -186,17 +188,17 @@ public class SignShopConfig {
     private static byte getDataFromString(String dur) {
         try {
             return Byte.parseByte(dur);
-        } catch(NumberFormatException ex) {
+        } catch (NumberFormatException ex) {
             return -1;
         }
     }
 
     private static void setupLinkables() {
         LinkableMaterials = new ArrayList<>();
-        for(Map.Entry<String, String> entry : ConfigUtil.fetchStringStringHashMap("linkableMaterials", config, false).entrySet()) {
+        for (Map.Entry<String, String> entry : ConfigUtil.fetchStringStringHashMap("linkableMaterials", config, false).entrySet()) {
             byte data = -1;
             String material;
-            if(entry.getKey().contains("~")) {
+            if (entry.getKey().contains("~")) {
                 String[] bits = entry.getKey().split("~");
                 material = bits[0];
                 data = getDataFromString(bits[1]);
@@ -212,12 +214,12 @@ public class SignShopConfig {
      * The Alias is used when checking for DenyLink permission nodes (i.e. DenyLink.door)
      *
      * @param material Material to register
-     * @param alias Alias to use for the given material
+     * @param alias    Alias to use for the given material
      */
     public static void addLinkable(String material, String alias) {
-        if(material == null || material.isEmpty())
+        if (material == null || material.isEmpty())
             return;
-        safeAddLinkeable(material.toUpperCase(), alias.toLowerCase(), (byte)-1);
+        safeAddLinkeable(material.toUpperCase(), alias.toLowerCase(), (byte) -1);
     }
 
     /**
@@ -227,18 +229,18 @@ public class SignShopConfig {
      * data value to be linked. It is allowed to register the same material with multiple data values.
      *
      * @param material Material to register
-     * @param alias Alias to use for the given material
-     * @param data Durability value to compare
+     * @param alias    Alias to use for the given material
+     * @param data     Durability value to compare
      */
     public static void addLinkable(String material, String alias, byte data) {
-        if(material == null || material.isEmpty())
+        if (material == null || material.isEmpty())
             return;
         safeAddLinkeable(material.toUpperCase(), alias.toLowerCase(), data);
     }
 
     private static void initConfig() {
         FileConfiguration ymlThing = ConfigUtil.loadYMLFromPluginFolder(configFilename);
-        if(ymlThing == null)
+        if (ymlThing == null)
             return;
         ConfigUtil.loadYMLFromJar(ymlThing, configFilename);
 
@@ -274,7 +276,7 @@ public class SignShopConfig {
         destroyMaterial = getMaterial(ymlThing.getString("DestroyMaterial", "GOLDEN_AXE"), Material.GOLDEN_AXE);
 
         // Sanity check
-        if(ChunkLoadRadius > 50 || ChunkLoadRadius < 0)
+        if (ChunkLoadRadius > 50 || ChunkLoadRadius < 0)
             ChunkLoadRadius = 3;
 
         config = ymlThing;
@@ -302,7 +304,7 @@ public class SignShopConfig {
         try {
             Class<?> aclass = Class.forName(fullClassPath);
             return aclass.newInstance();
-        } catch(ClassNotFoundException notfound) {
+        } catch (ClassNotFoundException notfound) {
             return null;
         } catch (InstantiationException ex) {
             return null;
@@ -312,57 +314,57 @@ public class SignShopConfig {
     }
 
     public static void setupOperations(Map<String, String> allSignOperations, String packageName) {
-        if(Operations == null)
-            Operations = new HashMap<String,List<String>>();
+        if (Operations == null)
+            Operations = new HashMap<String, List<String>>();
 
-        for(String sKey : allSignOperations.keySet()){
+        for (String sKey : allSignOperations.keySet()) {
             boolean failedOp = false;
             List<String> tempCheckedSignOperation = new LinkedList<String>();
 
-            for(String tempOperationString : allSignOperations.get(sKey).split("\\,")) {
+            for (String tempOperationString : allSignOperations.get(sKey).split("\\,")) {
                 List<String> bits = SignShopUtil.getParameters(tempOperationString.trim());
                 String op = bits.get(0);
                 Object opinstance = getInstance(packageName + "." + op.trim());
-                if(opinstance == null) // Retry with default package
+                if (opinstance == null) // Retry with default package
                     opinstance = getInstance(defaultOPPackage + "." + op.trim());
-                if(opinstance == null) {
+                if (opinstance == null) {
                     failedOp = true;
                     break;
                 }
 
-                if(opinstance instanceof SignShopOperation) {
-                    SignShopConfig.OperationInstances.put(op.trim(), (SignShopOperation)opinstance);
+                if (opinstance instanceof SignShopOperation) {
+                    SignShopConfig.OperationInstances.put(op.trim(), (SignShopOperation) opinstance);
                     tempCheckedSignOperation.add(tempOperationString.trim());
                 } else {
                     failedOp = true;
                 }
             }
-            if(!failedOp && !tempCheckedSignOperation.isEmpty())
+            if (!failedOp && !tempCheckedSignOperation.isEmpty())
                 Operations.put(sKey.toLowerCase(), tempCheckedSignOperation);
         }
 
         List<String> aLanguages = getOrderedListFromArray(Languages.split(","));
         aLanguages.remove("english");
 
-        SignShopConfig.OperationAliases = new HashMap<String,String>();
+        SignShopConfig.OperationAliases = new HashMap<String, String>();
 
-        for(String language : aLanguages) {
+        for (String language : aLanguages) {
             String filename = (language + ".yml");
             File languageFile = new File(instance.getDataFolder(), filename);
-            if(languageFile.exists()) {
+            if (languageFile.exists()) {
                 FileConfiguration ymlThing = new YamlConfiguration();
                 try {
                     ymlThing.load(languageFile);
-                } catch(FileNotFoundException ex) {
+                } catch (FileNotFoundException ex) {
                     continue;
-                } catch(IOException ex) {
+                } catch (IOException ex) {
                     continue;
-                } catch(InvalidConfigurationException ex) {
+                } catch (InvalidConfigurationException ex) {
                     continue;
                 }
-                HashMap<String,String> tempSignAliases = ConfigUtil.fetchStringStringHashMap("signs", ymlThing);
-                for(Map.Entry<String, String> alias : tempSignAliases.entrySet()) {
-                    if(Operations.containsKey(alias.getValue().toLowerCase())) {
+                HashMap<String, String> tempSignAliases = ConfigUtil.fetchStringStringHashMap("signs", ymlThing);
+                for (Map.Entry<String, String> alias : tempSignAliases.entrySet()) {
+                    if (Operations.containsKey(alias.getValue().toLowerCase())) {
                         SignShopConfig.OperationAliases.put(alias.getKey().toLowerCase(), alias.getValue().toLowerCase());
                     } else {
                         SignShop.log("Could not find " + alias.getValue() + " to alias as " + alias.getKey(), Level.WARNING);
@@ -378,47 +380,47 @@ public class SignShopConfig {
     }
 
     private static String fetchCaseCorrectedKey(Map<String, String> map, String lowercased) {
-        for(Map.Entry<String, String> entry : map.entrySet()) {
-            if(entry.getKey().equalsIgnoreCase(lowercased))
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            if (entry.getKey().equalsIgnoreCase(lowercased))
                 return entry.getKey();
         }
         return "";
     }
 
     private static void fixIncompleOperations() {
-        if(!fixIncompleteOperations)
+        if (!fixIncompleteOperations)
             return;
-        HashMap<String,String> tempSignOperations = ConfigUtil.fetchStringStringHashMap("signs", config, true);
+        HashMap<String, String> tempSignOperations = ConfigUtil.fetchStringStringHashMap("signs", config, true);
         Boolean changedSomething = false;
-        for(Map.Entry<String, List<String>> entry :  Operations.entrySet()) {
-            if(SignShopConfig.Commands.containsKey(entry.getKey().toLowerCase())) {
+        for (Map.Entry<String, List<String>> entry : Operations.entrySet()) {
+            if (SignShopConfig.Commands.containsKey(entry.getKey().toLowerCase())) {
                 List<SignShopOperationListItem> tempList = SignShopUtil.getSignShopOps(entry.getValue());
                 Boolean found = false;
-                for(SignShopOperationListItem tempOp : tempList)
-                    if(tempOp.getOperation() instanceof runCommand || tempOp.getParameters().contains("runCommand"))
+                for (SignShopOperationListItem tempOp : tempList)
+                    if (tempOp.getOperation() instanceof runCommand || tempOp.getParameters().contains("runCommand"))
                         found = true;
-                if(found)
+                if (found)
                     continue;
                 entry.getValue().add("runCommand");
                 String opName = fetchCaseCorrectedKey(tempSignOperations, entry.getKey());
-                if(opName.isEmpty())
+                if (opName.isEmpty())
                     opName = entry.getKey();
                 config.set(("signs." + opName), opListToString(entry.getValue()));
-                if(!changedSomething)
+                if (!changedSomething)
                     changedSomething = true;
                 SignShop.log("Added runCommand block to " + opName + " because it has a corresponding entry in the Commands section. Set fixIncompleteOperations to false to disable this function.", Level.INFO);
             }
         }
-        if(changedSomething)
+        if (changedSomething)
             ConfigUtil.loadYMLFromJar(config, configFilename);
     }
 
     private static void closeStream(Closeable in) {
-        if(in == null)
+        if (in == null)
             return;
         try {
             in.close();
-        } catch(IOException ex) {
+        } catch (IOException ex) {
 
         }
     }
@@ -428,29 +430,29 @@ public class SignShopConfig {
         InputStream in = SignShopConfig.class.getResourceAsStream("/" + filename);
         File file = new File(instance.getDataFolder(), filename);
         OutputStream os = null;
-        if(file.exists() && delete) {
-            if(!file.delete()) {
+        if (file.exists() && delete) {
+            if (!file.delete()) {
                 closeStream(in);
                 return;
             }
-        } else if(file.exists() && !delete) {
+        } else if (file.exists() && !delete) {
             return;
         }
         try {
-            if(in.available() == 0)
+            if (in.available() == 0)
                 return;
             file.createNewFile();
             os = new FileOutputStream(file.getPath());
             byte[] buffer = new byte[4096];
             int bytesRead;
             while ((bytesRead = in.read(buffer)) != -1) {
-              os.write(buffer, 0, bytesRead);
+                os.write(buffer, 0, bytesRead);
             }
-        } catch(java.io.FileNotFoundException notfoundex) {
+        } catch (java.io.FileNotFoundException notfoundex) {
 
-        } catch(java.io.IOException ioex) {
+        } catch (java.io.IOException ioex) {
 
-        } catch(NullPointerException nullex) {
+        } catch (NullPointerException nullex) {
 
         }
 
@@ -459,12 +461,12 @@ public class SignShopConfig {
     }
 
     public static String getError(String sType, Map<String, String> messageParts) {
-        Map<String,String> localisedError = Errors.get(SignShopConfig.preferedLanguage);
-        Map<String,String> defaultError = Errors.get(SignShopConfig.baseLanguage);
+        Map<String, String> localisedError = Errors.get(SignShopConfig.preferedLanguage);
+        Map<String, String> defaultError = Errors.get(SignShopConfig.baseLanguage);
 
         String error;
-        if(!localisedError.containsKey(sType) || localisedError.get(sType) == null) {
-            if(!defaultError.containsKey(sType) || defaultError.get(sType) == null)
+        if (!localisedError.containsKey(sType) || localisedError.get(sType) == null) {
+            if (!defaultError.containsKey(sType) || defaultError.get(sType) == null)
                 return "";
             else
                 error = defaultError.get(sType);
@@ -474,16 +476,16 @@ public class SignShopConfig {
     }
 
     public static String getMessage(String sType, String pOperation, Map<String, String> messageParts) {
-        Map<String,HashMap<String,String>> localisedMessage = Messages.get(SignShopConfig.preferedLanguage);
-        Map<String,HashMap<String,String>> defaultMessage = Messages.get(SignShopConfig.baseLanguage);
+        Map<String, HashMap<String, String>> localisedMessage = Messages.get(SignShopConfig.preferedLanguage);
+        Map<String, HashMap<String, String>> defaultMessage = Messages.get(SignShopConfig.baseLanguage);
 
         String sOperation = pOperation;
-        if(OperationAliases.containsKey(sOperation))
+        if (OperationAliases.containsKey(sOperation))
             sOperation = OperationAliases.get(sOperation);
 
         String message;
-        if(!localisedMessage.containsKey(sType) || !localisedMessage.get(sType).containsKey(sOperation) || localisedMessage.get(sType).get(sOperation) == null) {
-            if(!defaultMessage.containsKey(sType) || !defaultMessage.get(sType).containsKey(sOperation) || defaultMessage.get(sType).get(sOperation) == null) {
+        if (!localisedMessage.containsKey(sType) || !localisedMessage.get(sType).containsKey(sOperation) || localisedMessage.get(sType).get(sOperation) == null) {
+            if (!defaultMessage.containsKey(sType) || !defaultMessage.get(sType).containsKey(sOperation) || defaultMessage.get(sType).get(sOperation) == null) {
                 return "";
             } else
                 message = defaultMessage.get(sType).get(sOperation);
@@ -493,13 +495,12 @@ public class SignShopConfig {
         return fillInBlanks(message, messageParts);
     }
 
-    public static List<String> getBlocks(String pOp) {
-        String op = pOp;
-        if (OperationAliases.containsKey(op))
-            op = OperationAliases.get(op);
+    public static List<String> getIndividualOperations(String groupOperation) {
+        if (OperationAliases.containsKey(groupOperation))
+            groupOperation = OperationAliases.get(groupOperation);
 
-        if (Operations.containsKey(op))
-            return Operations.get(op);
+        if (Operations.containsKey(groupOperation))
+            return Operations.get(groupOperation);
         else
             return new LinkedList<>();
     }
@@ -509,18 +510,18 @@ public class SignShopConfig {
     }
 
     public static Collection<String> getAliases(String op) {
-        Collection<String> aliases = new LinkedList<String>();
-        if(Languages.contains(baseLanguage))
+        Collection<String> aliases = new LinkedList<>();
+        if (Languages.contains(baseLanguage))
             aliases.add(op); // If the baseLanguage is explicitly requested, we'll add the english OP as an alias
-        for(Map.Entry<String, String> entry : OperationAliases.entrySet()) {
-            if(entry.getValue().equals(op))
+        for (Map.Entry<String, String> entry : OperationAliases.entrySet()) {
+            if (entry.getValue().equals(op))
                 aliases.add(entry.getKey());
         }
         return aliases;
     }
 
     public static boolean registerOperation(String sName, List<String> blocks) {
-        if(sName != null && blocks != null && !blocks.isEmpty()) {
+        if (sName != null && blocks != null && !blocks.isEmpty()) {
             Operations.put(sName, blocks);
             return true;
         }
@@ -532,7 +533,7 @@ public class SignShopConfig {
     }
 
     public static boolean registerMessage(String language, String type, String shop, String message) {
-        if(Messages.containsKey(language) && Messages.get(language).containsKey(type)) {
+        if (Messages.containsKey(language) && Messages.get(language).containsKey(type)) {
             HashMap<String, String> temp = Messages.get(language).get(type);
             temp.put(shop, message);
             return true;
@@ -546,7 +547,7 @@ public class SignShopConfig {
     }
 
     public static boolean registerMessages(String language, String type, Map<String, String> messagesByShop) {
-        if(Messages.containsKey(language) && Messages.get(language).containsKey(type)) {
+        if (Messages.containsKey(language) && Messages.get(language).containsKey(type)) {
             HashMap<String, String> temp = Messages.get(language).get(type);
             temp.putAll(messagesByShop);
             return true;
@@ -560,7 +561,7 @@ public class SignShopConfig {
     }
 
     public static boolean registerErrorMessage(String language, String type, String message) {
-        if(Messages.containsKey(language)) {
+        if (Messages.containsKey(language)) {
             Map<String, String> temp = Errors.get(language);
             temp.put(type, message);
             return true;
@@ -574,7 +575,7 @@ public class SignShopConfig {
     }
 
     public static boolean registerErrorMessages(String language, Map<String, String> messagesByType) {
-        if(Messages.containsKey(language)) {
+        if (Messages.containsKey(language)) {
             Errors.get(language).putAll(messagesByType);
             return true;
         } else {
@@ -585,14 +586,14 @@ public class SignShopConfig {
     public static String fillInBlanks(String pMessage, Map<String, String> messageParts) {
         String message = pMessage;
 
-        if(messageParts == null || messageParts.isEmpty())
+        if (messageParts == null || messageParts.isEmpty())
             return message;
 
         TreeMap<String, String> temp = new TreeMap<String, String>(new StringLengthComparator());
         temp.putAll(messageParts);
 
-        for(Map.Entry<String, String> part : temp.entrySet()) {
-            if(part != null && part.getKey() != null && part.getValue() != null)
+        for (Map.Entry<String, String> part : temp.entrySet()) {
+            if (part != null && part.getKey() != null && part.getValue() != null)
                 message = message.replace(part.getKey(), part.getValue());
         }
         message = message.replace("\\", "");
@@ -602,9 +603,9 @@ public class SignShopConfig {
     private static void setupBlacklist() {
         List<String> tempList = config.getStringList("Blacklisted_items");
         BlacklistedItems = new LinkedList<Material>();
-        for(String item : tempList) {
+        for (String item : tempList) {
             Material mat = Material.getMaterial(item.toUpperCase());
-            if(mat != null)
+            if (mat != null)
                 BlacklistedItems.add(mat);
             else
                 SignShop.log("Material called: " + item + " could not be added to the blacklist as it does not exist, please check your config.yml!", Level.WARNING);
@@ -614,18 +615,18 @@ public class SignShopConfig {
     public static Boolean isItemOnBlacklist(Material mat) {
         return (
                 (SignShopConfig.BlacklistedItems.contains(mat) && !SignShopConfig.getUseBlacklistAsWhitelist())
-                    ||
-                (!SignShopConfig.BlacklistedItems.contains(mat) && SignShopConfig.getUseBlacklistAsWhitelist())
+                        ||
+                        (!SignShopConfig.BlacklistedItems.contains(mat) && SignShopConfig.getUseBlacklistAsWhitelist())
         );
     }
 
     public static ItemStack isAnyItemOnBlacklist(ItemStack[] stacks) {
-        if(stacks == null)
+        if (stacks == null)
             return null;
-        for(ItemStack single : stacks) {
-            if(single == null)
+        for (ItemStack single : stacks) {
+            if (single == null)
                 continue;
-            if(isItemOnBlacklist(single.getType())) {
+            if (isItemOnBlacklist(single.getType())) {
                 return single;
             }
         }

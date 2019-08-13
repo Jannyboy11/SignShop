@@ -34,7 +34,7 @@ public class PermitChecker implements Listener {
     public void onSSBuildEvent(SSCreatedEvent event) {
         if(event.isCancelled() || !event.canBeCancelled())
             return;
-        List<String> operation = SignShopConfig.getBlocks(event.getOperation());
+        List<String> operation = SignShopConfig.getIndividualOperations(event.getOperation());
         if(!hasPermit(event.getPlayer(), operation, event.getPlayer().getWorld(), event.getItems())) {
             event.getPlayer().sendMessage(SignShopConfig.getError("need_permit", null));
             event.setCancelled(true);
@@ -45,7 +45,7 @@ public class PermitChecker implements Listener {
     public void onSSPreTransactionEvent(SSPreTransactionEvent event) {
         if(event.isCancelled() || !event.canBeCancelled())
             return;
-        List<String> operation = SignShopConfig.getBlocks(event.getOperation());
+        List<String> operation = SignShopConfig.getIndividualOperations(event.getOperation());
         if(!hasPermit(event.getOwner(), operation, event.getPlayer().getWorld(), event.getShop().getItems())) {
             event.getPlayer().sendMessage(SignShopConfig.getError("no_permit_owner", null));
             event.setCancelled(true);

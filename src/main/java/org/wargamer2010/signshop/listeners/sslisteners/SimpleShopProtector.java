@@ -84,7 +84,7 @@ public class SimpleShopProtector implements Listener {
         SignShopArguments ssArgs = new SignShopArguments(EconomyUtil.parsePrice(sign.getLines()[3]), shop.getItems(), containables, activatables,
                 ssPlayer, shop.getOwner(), shop.getSign(), shop.getOperation(), BlockFace.DOWN, Action.LEFT_CLICK_BLOCK, SignShopArgumentsType.Setup);
 
-        List<String> operation = SignShopConfig.getBlocks(shop.getOperation());
+        List<String> operation = SignShopConfig.getIndividualOperations(shop.getOperation());
         List<SignShopOperationListItem> SignShopOperations = SignShopUtil.getSignShopOps(operation);
         if (SignShopOperations == null)
             return true;

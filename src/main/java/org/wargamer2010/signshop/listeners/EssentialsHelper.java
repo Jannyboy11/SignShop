@@ -39,7 +39,7 @@ class EssentialsHelper {
                     if(essShopName.isEmpty())
                         continue;
                     essShopName = ChatColor.stripColor(essShopName).toLowerCase();
-                    if (!SignShopConfig.getBlocks(essShopName).isEmpty()) {
+                    if (!SignShopConfig.getIndividualOperations(essShopName).isEmpty()) {
                         SignShop.log("Sign with name " + sign.getTemplateName() + " is enabled for Essentials and conflicts with SignShop!", Level.SEVERE);
                         if (!essConflictFound)
                             essConflictFound = true;

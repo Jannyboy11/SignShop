@@ -17,7 +17,7 @@ public abstract class SignShopEventHandler implements SignShopOperation {
     public abstract boolean handleEvent(SignShopArguments ssArgs, SSEvent event);
 
     public static boolean dispatchEvent(SignShopArguments ssArgs, SSEvent event, String operation) {
-        List<String> stringops = SignShopConfig.getBlocks(operation);
+        List<String> stringops = SignShopConfig.getIndividualOperations(operation);
         if(stringops.isEmpty()) {
             SignShop.log("Invalid operation found while trying to dispatch event: " + operation, Level.WARNING);
             return false;

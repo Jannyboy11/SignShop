@@ -19,14 +19,14 @@ public class SimpleShopLimiter implements Listener {
         if(event.isCancelled() || !event.canBeCancelled())
             return;
         int iLimit = event.getPlayer().reachedMaxShops();
-        if(!SignShopConfig.getBlocks(event.getOperation()).contains("playerIsOp") && iLimit > 0) {
+        if(!SignShopConfig.getIndividualOperations(event.getOperation()).contains("playerIsOp") && iLimit > 0) {
             event.getPlayer().sendMessage(SignShopConfig.getError("too_many_shops", null).replace("!max", Integer.toString(iLimit)));
             ItemUtil.setSignStatus(event.getSign(), ChatColor.BLACK);
             event.setCancelled(true);
             return;
         }
 
-        List<String> operation = SignShopConfig.getBlocks(event.getOperation());
+        List<String> operation = SignShopConfig.getIndividualOperations(event.getOperation());
         Block bClicked = event.getSign();
 
         for(Block bCheckme : event.getContainables()) {
