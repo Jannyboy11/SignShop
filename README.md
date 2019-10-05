@@ -9,3 +9,7 @@ Those plugins need to be copied into the /libs folder. A list of dependencies ca
 Then, per usual for a [maven](https://maven.apache.org/) project, run `mvn clean package` to compile the SignShop jar.
 Since I'm using the --release compiler option, JDK 9 or higher is required to compile the plugin,
 but it'll still run on Java 8 runtime environments for now.
+
+## Known issues
+- Signs have to be on top of the chests for now
+- Shop incorrectly report that they're out of stock even though they're not. 

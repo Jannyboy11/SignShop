@@ -111,8 +111,9 @@ public class SignShopBlockListener implements Listener {
                 cancel |= SSEventFactory.callItemMoveEvent(shops, blockInventoryHolder, SSItemMoveEvent.Direction.OUT, event.getItem(), cancel);
             }
         }
+
         if (target instanceof BlockInventoryHolder) {
-            BlockInventoryHolder blockInventoryHolder = (BlockInventoryHolder) source;
+            BlockInventoryHolder blockInventoryHolder = (BlockInventoryHolder) target;
             Block block = blockInventoryHolder.getBlock();
             if (store.isShopContainer(block)) {
                 Set<Shop> shops = store.getShopsByBlock(block);

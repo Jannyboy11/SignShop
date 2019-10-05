@@ -97,6 +97,7 @@ public class ItemUtil {
                 .toArray(ItemStack[]::new);
     }
 
+    //TODO fix this routine.
     public static boolean stockOKForContainables(List<Block> containables, ItemStack[] items, boolean bTakeOrGive) {
         return getFirstStockOKForContainables(containables, items, bTakeOrGive) != null;
     }
